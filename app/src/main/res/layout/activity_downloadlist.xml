@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/activity_downloadfilelist_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/activity_downloadfilelist_ib_delete"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2"
+                    android:background="@color/activity_download_btn_disable"
+                    android:paddingBottom="@dimen/activity_download_bottomtop_padding"
+                    android:paddingTop="@dimen/activity_download_bottomtop_padding"
+                    android:src="@drawable/bottom_delete"/>
+
+                <TextView
+                    android:id="@+id/activity_downloadfilelist_tv_download"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:background="@android:color/white"
+                    android:gravity="center"
+                    android:paddingBottom="@dimen/activity_download_bottomtop_padding"
+                    android:paddingTop="@dimen/activity_download_bottomtop_padding"
+                    android:text="下载"
+                    android:textSize="15sp"/>
+
+                <TextView
+                    android:id="@+id/activity_downloadfilelist_tv_edit"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3"
+                    android:background="@color/activity_download_btn_disable"
+                    android:gravity="center"
+                    android:paddingBottom="@dimen/activity_download_bottomtop_padding"
+                    android:paddingTop="@dimen/activity_download_bottomtop_padding"
+                    android:text="编辑"
+                    android:textSize="15sp"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/activity_downloadfilelist_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/activity_downloadfilelist_ll"/>
+
+</RelativeLayout>

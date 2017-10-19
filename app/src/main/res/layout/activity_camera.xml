@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+        <LinearLayout
+            android:id="@+id/camear_ll_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/camera_ib_video"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/main_icon1"/>
+
+                <ImageButton
+                    android:id="@+id/camera_ib_camera"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/main_icon2"/>
+
+                <ImageButton
+                    android:id="@+id/camera_ib_edit"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+
+                    android:src="@drawable/main_icon3"/>
+
+                <ImageButton
+                    android:id="@+id/camera_ib_download"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/main_icon4"/>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+                <SurfaceView
+                    android:id="@+id/camera_sv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"/>
+
+
+                <TextView
+                    android:id="@+id/camera_tv_isvideo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignRight="@id/camera_sv"
+                    android:layout_alignTop="@id/camera_sv"
+                    android:padding="10dp"
+                    android:text="REC"
+                    android:textColor="@android:color/holo_red_light"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:visibility="invisible"/>
+        </RelativeLayout>
+
+
+        <com.smd.remotecamera.view.InterceptTouchLayout
+            android:id="@+id/camera_pb_top"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#A666"
+            android:visibility="gone">
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"/>
+        </com.smd.remotecamera.view.InterceptTouchLayout>
+</RelativeLayout>

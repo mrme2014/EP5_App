@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android_custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <com.smd.remotecamera.view.SquareImageView
+        android:id="@+id/item_rv_filelist_iv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
+        android:scaleType="fitCenter" />
+
+    <CheckBox
+        android:id="@+id/item_rv_filelist_cb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="15dp"
+        android:button="@drawable/cb_selector"
+        android:paddingRight="12dp" />
+
+    <TextView
+        android:id="@+id/item_rv_filelist_tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="7dp"
+        android:layout_marginTop="3dp"
+        android:paddingBottom="7dp"
+        android:text="00:00:00"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/item_rv_filelist_tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/item_rv_filelist_tv_time"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="25dp"
+        android:text="1970-01-01"
+        android:textColor="@android:color/white" />
+
+    <TextView
+        android:id="@+id/item_rv_filelist_tv_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:paddingBottom="7dp"
+        android:paddingRight="7dp"
+        android:text="4M"
+        android:textColor="@android:color/white" />
+
+    <com.smd.remotecamera.view.RoundProgressBar
+        android:id="@+id/item_rv_filelist_rpb_download"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+
+
+        android_custom:roundColor="#FFF"
+        android_custom:roundProgressColor="#2A9DFA"
+        android_custom:roundWidth="7dp"
+        android_custom:textColor="#FFF"
+        android_custom:textSize="18sp" />
+</RelativeLayout>

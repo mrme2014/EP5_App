@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/fragment_imageedit_ll_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/fragment_imageedit_text_font"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="选择字体" />
+    </LinearLayout>
+
+    <HorizontalScrollView
+        android:id="@+id/fragment_imageedit_hsv_shui"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_shui_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_shui_main_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/main_icon1" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_shui_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_1"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_shui_main_1"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="第一个水印"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_shui_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_shui_main_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/main_icon1" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_shui_select_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_2"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_shui_main_2"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="第二个水印"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_shui_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_shui_main_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/main_icon1" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_shui_select_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_3"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_shui_main_3"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="第三个水印"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_shui_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_shui_main_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/main_icon1" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_shui_select_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_4"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_shui_main_4"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="第四个水印"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <HorizontalScrollView
+        android:id="@+id/fragment_imageedit_hsv_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_0" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_1"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_1"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="原图"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_1" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_2"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_2"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="黑白"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_2" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_3"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_3"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="深情"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_3" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_4"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_4"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="素描"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_4" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_5"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_5"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="温暖"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_5" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_6"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_6"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="边缘渲染"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_6" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_7"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_7"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="全图渲染"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/fragment_imageedit_filter_8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp">
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_btm_filter_main_8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:paddingBottom="7dp"
+                    android:src="@drawable/filter_7" />
+
+                <ImageView
+                    android:id="@+id/fragment_imageedit_filter_select_8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/fragment_imageedit_btm_filter_main_8"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/bian_circle"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/fragment_imageedit_btm_filter_main_8"
+                    android:layout_centerHorizontal="true"
+                    android:paddingTop="5dp"
+                    android:text="锐利"
+                    android:textColor="#333333" />
+            </RelativeLayout>
+        </LinearLayout>
+    </HorizontalScrollView>
+</FrameLayout>
