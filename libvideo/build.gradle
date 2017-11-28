@@ -1,19 +1,19 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 23
+    buildToolsVersion '25.0.0'
 
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 25
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
 
         ndk {
             //设置支持的SO库架构
-            abiFilters 'x86', 'armeabi-v7a'
+            abiFilters 'armeabi-v7a'
         }
 
     }
@@ -29,10 +29,11 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile files('libs/pldroid-shortvideo-1.5.1.jar')
     compile files('libs/pldroid-player-2.0.1.jar')
+    compile files('libs/pldroid-shortvideo-1.7.0.jar')
     compile 'cn.aigestudio.downloader:Downloader:1.4.3'
     compile 'com.qiniu:qiniu-android-sdk:7.3.10'
     compile 'org.jetbrains:annotations-java5:15.0'
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile project(':sharelib')
+
 }

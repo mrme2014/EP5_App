@@ -1,7 +1,10 @@
 package com.smd.remotecamera.view;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.support.v4.util.Pair;
 import android.support.v4.widget.ViewDragHelper;
@@ -12,6 +15,8 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.qiaomu.libvideo.utils.AppUtils;
+import com.smd.remotecamera.R;
 import com.smd.remotecamera.util.Util;
 
 
@@ -20,6 +25,7 @@ public class DragLayout extends FrameLayout {
     private ViewDragHelper mViewDragHelper;
 
     private boolean mShouldAddView = false;
+    private boolean mAskDelete = true;
     private TextView mTextView;
     private int mTextX;
     private int mTextY;
@@ -54,6 +60,7 @@ public class DragLayout extends FrameLayout {
         }
     }
 
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return mViewDragHelper.shouldInterceptTouchEvent(ev);
@@ -70,7 +77,11 @@ public class DragLayout extends FrameLayout {
             mDownY = (int) event.getY();
         }
         if ((mTextView != null) && (event.getAction() == MotionEvent.ACTION_UP) && (Math.abs(event.getX() - mDownX) < 1) && (Math.abs(event.getY() - mDownY) < 1) && (mOnAddTextViewListener != null)) {
-            mOnAddTextViewListener.onAddTextView();
+            int[] postions = new int[2];
+            mTextView.getLocationOnScreen(postions);
+            RectF rectF = new RectF(postions[0], postions[1], postions[0] + mTextView.getWidth(), postions[1] + mTextView.getHeight());
+            if (!rectF.contains(event.getRawX(), event.getRawY()))
+                mOnAddTextViewListener.onAddTextView();
         }
         mViewDragHelper.processTouchEvent(event);
         return true;
@@ -81,7 +92,7 @@ public class DragLayout extends FrameLayout {
     }
 
     public void setText(String str) {
-        mTextView.setText(str);
+        if (mTextView != null) mTextView.setText(str);
     }
 
     public void setFont(String font) {
@@ -112,7 +123,7 @@ public class DragLayout extends FrameLayout {
         int[] location = new int[2];
         getLocationOnScreen(location);
         Paint.FontMetricsInt fontMetrics = mTextView.getPaint().getFontMetricsInt();
-        return new Pair<>(mTextView.getLeft(), mTextView.getTop() - location[1]-fontMetrics.bottom);
+        return new Pair<>(mTextView.getLeft(), mTextView.getTop() - location[1] - fontMetrics.bottom);
     }
 
     public void setBmpSize(int width, int height) {
@@ -124,7 +135,7 @@ public class DragLayout extends FrameLayout {
     }
 
     public void reset() {
-        removeView(mTextView);
+        removeAllViews();
         mTextView = null;
     }
 
@@ -132,10 +143,12 @@ public class DragLayout extends FrameLayout {
         mShouldAddView = false;
         mTextX = (int) x;
         mTextY = (int) y;
-        mTextView = new TextView(getContext());
+        final TextView textView = new TextView(getContext());
         ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        mTextView.setLayoutParams(layoutParams);
-        addView(mTextView);
+        textView.setLayoutParams(layoutParams);
+        addView(textView);
+        mTextView = textView;
+        textView.setTextColor(Color.WHITE);
         requestLayout();
         if (mOnAddTextViewListener != null) {
             mOnAddTextViewListener.onAddTextView();
@@ -146,7 +159,9 @@ public class DragLayout extends FrameLayout {
 
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            return true;
+            boolean capture = child != DragLayout.this;
+            mAskDelete = capture;
+            return capture;
         }
 
         @Override
@@ -167,6 +182,29 @@ public class DragLayout extends FrameLayout {
             }
             mTextY = top;
             return top;
+        }
+
+        @Override
+        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+            super.onViewPositionChanged(changedView, left, top, dx, dy);
+            mAskDelete = false;
+        }
+
+        @Override
+        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+            super.onViewReleased(releasedChild, xvel, yvel);
+            if (!mAskDelete)
+                return;
+            AppUtils.showAlertDialog(getContext(), R.string.tip_delete_text, R.string.ok, R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    if (which == -1) {
+                        removeView(mTextView);
+                    }
+                }
+            });
+            mAskDelete = true;
         }
     };
 

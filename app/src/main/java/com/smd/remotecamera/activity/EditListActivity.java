@@ -12,6 +12,10 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.qiaomu.libvideo.VideoTranscodeActivity;
+import com.qiaomu.libvideo.VideoTrimActivity;
+import com.qiaomu.libvideo.utils.CompressUtils;
+import com.qiaomu.libvideo.utils.ToastUtils;
 import com.smd.remotecamera.R;
 import com.smd.remotecamera.adapter.FileListAdapter;
 import com.smd.remotecamera.bean.RemoteFileBean;
@@ -45,6 +49,7 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
     private List<RemoteFileBean> mVideoList;
     private List<RemoteFileBean> mPhotoList;
     private List<RemoteFileBean> mCheckedList;
+    private boolean isVideoEmpty, isPhotoEmpty;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -102,7 +107,7 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
 //        mRemoteFileController.setOnRemoteFileQueryFinishListener(mOnQueryFinishListener);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        mRemoteFileListFragment = new RemoteFileListFragment(true);
+        mRemoteFileListFragment = new RemoteFileListFragment(true, FileListAdapter.FileNameType.DOWNLOAD);
         mRemoteFileListFragment.addOnPageChangeListener(mOnPageChangeListener);
         mRemoteFileListFragment.setOnClickBackListener(mOnClickBackListener);
         mRemoteFileListFragment.setOnCheckedNumChangedListener(this);
@@ -127,9 +132,11 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
                         }
                     });
                     mVideoList = new ArrayList<RemoteFileBean>();
-                    for (File file : videoFiles) {
-                        tmpBean = new RemoteFileBean(file.getName(), null, file.length(), Util.getTimeStr(file.getName()), true);
-                        mVideoList.add(tmpBean);
+                    if (videoFiles != null) {
+                        for (File file : videoFiles) {
+                            tmpBean = new RemoteFileBean(file.getName(), null, file.length(), Util.getTimeStr(file.getName()), true);
+                            mVideoList.add(tmpBean);
+                        }
                     }
                 }
                 File photoFolder = new File(FileConstants.LOCAL_PHOTO_PATH);
@@ -144,24 +151,32 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
                         }
                     });
                     mPhotoList = new ArrayList<RemoteFileBean>();
-                    for (File file : photoFiles) {
-                        tmpBean = new RemoteFileBean(file.getName(), null, file.length(), Util.getTimeStr(file.getName()), true);
-                        mPhotoList.add(tmpBean);
+                    if (photoFiles != null) {
+                        for (File file : photoFiles) {
+                            tmpBean = new RemoteFileBean(file.getName(), null, file.length(), Util.getTimeStr(file.getName()), true);
+                            String checkFileName = "0" + file.getName().substring(0, file.getName().lastIndexOf(".")) + FileConstants.POSTFIX_PHOTO_EDIT;
+                            File checkFile = new File(FileConstants.LOCAL_EDIT_PATH, checkFileName);
+                            tmpBean.setHasEdit(checkFile.exists());
+                            mPhotoList.add(tmpBean);
+
+                        }
                     }
                 }
                 mRemoteFileListFragment.setData(mVideoList, mPhotoList);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        isVideoEmpty = mVideoList == null || mVideoList.size() == 0;
+                        isPhotoEmpty = mPhotoList == null || mPhotoList.size() == 0;
+                        if (isVideoEmpty)
+                            mLLVideo.setVisibility(View.GONE);
+                    }
+                });
+
             }
         }).start();
     }
 
-//    private RemoteFileController.OnRemoteFileQueryFinishListener mOnQueryFinishListener = new RemoteFileController.OnRemoteFileQueryFinishListener() {
-//        @Override
-//        public void onQueryFinished(List<RemoteFileBean> videoData, List<RemoteFileBean> photoData) {
-//            mVideoList = videoData;
-//            mPhotoList = photoData;
-//            mRemoteFileListFragment.setData(videoData, photoData);
-//        }
-//    };
 
     private RemoteFileListFragment.OnClickBackListener mOnClickBackListener = new RemoteFileListFragment.OnClickBackListener() {
         @Override
@@ -185,12 +200,16 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
         public void onPageSelected(int position) {
             switch (position) {
                 case 0:
-                    mLLVideo.setVisibility(View.VISIBLE);
+                    if (!isVideoEmpty) {
+                        mLLVideo.setVisibility(View.VISIBLE);
+                    }
                     mLLPhoto.setVisibility(View.GONE);
                     break;
                 case 1:
+                    if (!isPhotoEmpty) {
+                        mLLPhoto.setVisibility(View.VISIBLE);
+                    }
                     mLLVideo.setVisibility(View.GONE);
-                    mLLPhoto.setVisibility(View.VISIBLE);
                     break;
             }
         }
@@ -204,13 +223,20 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
     @Override
     public void onClick(View v) {
         if (mCheckedList == null || mCheckedList.size() != 1) {
+            ToastUtils.s(this, "请至多选择一个视频或图片文件!");
             return;
         }
-        switch (v.getId()) {
-            case R.id.activity_editfilelist_tv_cut:
 
-                break;
+        switch (v.getId()) {
+            case R.id.activity_editfilelist_tv_cut: {
+                String file_path = FileConstants.LOCAL_VIDEO_PATH + File.separator + mCheckedList.get(0).getName();
+                VideoTrimActivity.startTrimActivity(this, file_path);
+            }
+            break;
+            case R.id.activity_editfilelist_tv_mp4:
             case R.id.activity_editfilelist_tv_compress:
+                String file_path = FileConstants.LOCAL_VIDEO_PATH + File.separator + mCheckedList.get(0).getName();
+                CompressUtils.compress(this, file_path);
 
                 break;
             case R.id.activity_editfilelist_ib_shui:

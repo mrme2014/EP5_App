@@ -85,7 +85,7 @@
                 android:paddingTop="@dimen/activity_download_bottomtop_padding"
                 android:text="转MP4"
                 android:textSize="15sp"
-                android:visibility="gone"/>
+                />
 
         </LinearLayout>
 

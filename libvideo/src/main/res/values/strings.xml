@@ -3,4 +3,13 @@
     <string name="title_transcode">视频压缩转码</string>
     <string name="upload">上传</string>
     <string name="cancel_upload">取消</string>
+    <string name="file_not_found">文件不存在</string>
+    <string name="video_too_large">视频文件比较大,压缩可能耗时较长,请耐心等待!</string>
+    <string name="continue_">继续</string>
+    <string name="cancel">取消</string>
+    <string name="ok">没关系</string>
+    <string name="original_video_size">原视频大小:</string>
+    <string name="compress_video_size">压缩后大小:</string>
+    <string name="play">播放</string>
+    <string name="not_now">下次再说</string>
 </resources>

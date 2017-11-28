@@ -1,6 +1,8 @@
 package com.smd.remotecamera.controller;
 
 
+import android.util.Log;
+
 import com.ntk.nvtkit.NVTKitModel;
 import com.ntk.util.ParseResult;
 import com.ntk.util.Util;
@@ -32,7 +34,7 @@ public class RemoteFileController {
                 final List<RemoteFileBean> photoData = new ArrayList<>();
                 ParseResult result = NVTKitModel.getFileList();
                 File tmpFile = null;
-                if (result.getFileItemList() != null) {
+                if (result != null && result.getFileItemList() != null) {
                     for (int i = 0; i < result.getFileItemList().size(); i++) {
                         final String name = result.getFileItemList().get(i).NAME;
                         String urlStr = result.getFileItemList().get(i).FPATH;
@@ -41,10 +43,12 @@ public class RemoteFileController {
                         String timeStr = result.getFileItemList().get(i).TIME;
                         if (name.endsWith(FileConstants.POSTFIX_VIDEO)) {
                             tmpFile = new File(FileConstants.LOCAL_VIDEO_PATH + File.separator + name);
-                            videoData.add(new RemoteFileBean(name, url, size, timeStr, (tmpFile.exists() && tmpFile.length() == size)));
+                            RemoteFileBean remoteFileBean = new RemoteFileBean(name, url, size, timeStr, (tmpFile.exists() && tmpFile.length() == size));
+                            videoData.add(remoteFileBean);
                         } else if (name.endsWith(FileConstants.POSTFIX_PHOTO)) {
                             tmpFile = new File(FileConstants.LOCAL_PHOTO_PATH + File.separator + name);
-                            photoData.add(new RemoteFileBean(name, url, size, timeStr, (tmpFile.exists() && tmpFile.length() == size)));
+                            RemoteFileBean remoteFileBean = new RemoteFileBean(name, url, size, timeStr, (tmpFile.exists() && tmpFile.length() == size));
+                            photoData.add(remoteFileBean);
                         }
                     }
                 }

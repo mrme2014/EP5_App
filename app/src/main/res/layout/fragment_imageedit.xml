@@ -15,151 +15,28 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="选择字体" />
+
+
+        <Button
+            android:id="@+id/fragment_imageedit_text_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="字体大小" />
+
+        <Button
+            android:id="@+id/fragment_imageedit_text_color"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="字体颜色" />
     </LinearLayout>
 
-    <HorizontalScrollView
-        android:id="@+id/fragment_imageedit_hsv_shui"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/waterReclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="120dp"
+        android:background="#000000">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <RelativeLayout
-                android:id="@+id/fragment_imageedit_shui_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp">
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_btm_shui_main_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:paddingBottom="7dp"
-                    android:src="@drawable/main_icon1" />
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_filter_shui_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_1"
-                    android:layout_centerHorizontal="true"
-                    android:src="@drawable/bian_circle" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/fragment_imageedit_btm_shui_main_1"
-                    android:layout_centerHorizontal="true"
-                    android:paddingTop="5dp"
-                    android:text="第一个水印"
-                    android:textColor="#333333" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/fragment_imageedit_shui_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp">
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_btm_shui_main_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:paddingBottom="7dp"
-                    android:src="@drawable/main_icon1" />
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_shui_select_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_2"
-                    android:layout_centerHorizontal="true"
-                    android:src="@drawable/bian_circle"
-                    android:visibility="invisible" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/fragment_imageedit_btm_shui_main_2"
-                    android:layout_centerHorizontal="true"
-                    android:paddingTop="5dp"
-                    android:text="第二个水印"
-                    android:textColor="#333333" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/fragment_imageedit_shui_3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp">
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_btm_shui_main_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:paddingBottom="7dp"
-                    android:src="@drawable/main_icon1" />
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_shui_select_3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_3"
-                    android:layout_centerHorizontal="true"
-                    android:src="@drawable/bian_circle"
-                    android:visibility="invisible" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/fragment_imageedit_btm_shui_main_3"
-                    android:layout_centerHorizontal="true"
-                    android:paddingTop="5dp"
-                    android:text="第三个水印"
-                    android:textColor="#333333" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/fragment_imageedit_shui_4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="10dp">
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_btm_shui_main_4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:paddingBottom="7dp"
-                    android:src="@drawable/main_icon1" />
-
-                <ImageView
-                    android:id="@+id/fragment_imageedit_shui_select_4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/fragment_imageedit_btm_shui_main_4"
-                    android:layout_centerHorizontal="true"
-                    android:src="@drawable/bian_circle"
-                    android:visibility="invisible" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/fragment_imageedit_btm_shui_main_4"
-                    android:layout_centerHorizontal="true"
-                    android:paddingTop="5dp"
-                    android:text="第四个水印"
-                    android:textColor="#333333" />
-            </RelativeLayout>
-
-        </LinearLayout>
-    </HorizontalScrollView>
+    </android.support.v7.widget.RecyclerView>
 
     <HorizontalScrollView
         android:id="@+id/fragment_imageedit_hsv_filter"
@@ -406,7 +283,8 @@
                 android:id="@+id/fragment_imageedit_filter_8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/fragment_imageedit_btm_filter_main_8"

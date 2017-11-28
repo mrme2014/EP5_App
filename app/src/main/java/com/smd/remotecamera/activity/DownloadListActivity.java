@@ -11,14 +11,18 @@ import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.ntk.nvtkit.NVTKitModel;
+import com.qiaomu.libvideo.utils.AppUtils;
+import com.qiaomu.libvideo.utils.ToastUtils;
 import com.smd.remotecamera.R;
 import com.smd.remotecamera.adapter.FileListAdapter;
 import com.smd.remotecamera.bean.RemoteFileBean;
@@ -65,7 +69,12 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String ack = NVTKitModel.changeMode(NVTKitModel.MODE_PLAYBACK);
+                try {
+                    final String ack = NVTKitModel.changeMode(NVTKitModel.MODE_PLAYBACK);
+                } catch (Exception e) {
+
+                    e.printStackTrace();
+                }
                 mRemoteFileController.qeryRemoteFileList();
             }
         }).start();
@@ -123,16 +132,35 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
         mRemoteFileController.setOnRemoteFileQueryFinishListener(mOnQueryFinishListener);
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        mRemoteFileListFragment = new RemoteFileListFragment(false);
+        mRemoteFileListFragment = new RemoteFileListFragment(false, FileListAdapter.FileNameType.ORIGINAL);
         mRemoteFileListFragment.setOnClickBackListener(mOnClickBackListener);
         mRemoteFileListFragment.setOnCheckedNumChangedListener(this);
+        mRemoteFileListFragment.setonPagerSelectListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                boolean isVideoEmpty = mVideoList == null || mVideoList.size() == 0;
+                boolean isPhotoEmpty = mPhotoList == null || mPhotoList.size() == 0;
+                findViewById(R.id.activity_downloadfilelist_ll).setVisibility(position == 0 ? (isVideoEmpty ? View.GONE : View.VISIBLE) : (isPhotoEmpty ? View.GONE : View.VISIBLE));
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         transaction.add(R.id.activity_downloadfilelist_container, mRemoteFileListFragment);
         transaction.commit();
     }
 
     private void checkDownload() {
         List<RemoteFileBean> tmp = new ArrayList<>(mVideoList);
-        tmp.addAll(mPhotoList);
+        if (mPhotoList != null)
+            tmp.addAll(mPhotoList);
         if (mCheckedList.size() == 0) {
             CommonUtil.showToast(getApplicationContext(), "请选择要下载的文件");
         }
@@ -156,9 +184,12 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
     private RemoteFileController.OnRemoteFileQueryFinishListener mOnQueryFinishListener = new RemoteFileController.OnRemoteFileQueryFinishListener() {
         @Override
         public void onQueryFinished(List<RemoteFileBean> videoData, List<RemoteFileBean> photoData) {
-            mVideoList = RemoteFileBean.getList();
+
+            mVideoList = videoData;
             mPhotoList = photoData;
+            findViewById(R.id.activity_downloadfilelist_ll).setVisibility((mVideoList == null || mVideoList.size() == 0) ? View.GONE : View.VISIBLE);
             mRemoteFileListFragment.setData(mVideoList, mPhotoList);
+
         }
     };
 
@@ -214,6 +245,7 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
                 break;
             case R.id.activity_downloadfilelist_tv_edit:
                 if (mCheckedList.size() != 1) {
+                    ToastUtils.s(this, "请至多选择一个视频或图片文件!");
                     break;
                 }
                 if (mCheckedList.get(0).getName().endsWith(FileConstants.POSTFIX_PHOTO)) {
@@ -221,6 +253,8 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
                     shuiIntent.putExtra(ImageEditActivity.KEY_TYPE, ImageEditActivity.SHUI);
                     shuiIntent.putExtra(ImageEditActivity.KEY_IMGPATH, FileConstants.LOCAL_PHOTO_PATH + File.separator + mCheckedList.get(0).getName());
                     startActivity(shuiIntent);
+                } else {
+                    startActivity(new Intent(this, EditListActivity.class));
                 }
 
                 break;
@@ -228,20 +262,22 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
     }
 
     @Override
-    public void onDownloadFinish(boolean success, RemoteFileBean remoteFileBean) {
+    public void onDownloadFinish(boolean success, final RemoteFileBean remoteFileBean) {
         RemoteFileBean checkedBean = null;
         if (mCheckedList.size() == 1) {
             checkedBean = mCheckedList.get(0);
         }
+
         RemoteFileBean next;
         ListIterator<RemoteFileBean> videoIterator = mVideoList.listIterator();
         while (videoIterator.hasNext()) {
             next = videoIterator.next();
-            if (next.getName().equals(remoteFileBean.getName())) {
+            if (TextUtils.equals(remoteFileBean.getName(), next.getName())) {
                 next.setDownloaded(success);
                 CommonUtil.runOnUIThread(new Runnable() {
                     @Override
                     public void run() {
+                        AppUtils.insertVideo(DownloadListActivity.this, new File(FileConstants.LOCAL_VIDEO_PATH + "/" + remoteFileBean.getName()));
                         mTvEdit.setBackgroundColor(getResources().getColor(R.color.activity_download_btn_enable));
                     }
                 });
@@ -257,6 +293,7 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
                     CommonUtil.runOnUIThread(new Runnable() {
                         @Override
                         public void run() {
+                            AppUtils.insertImage(DownloadListActivity.this, FileConstants.LOCAL_PHOTO_PATH + "/" + remoteFileBean.getName());
                             mTvEdit.setBackgroundColor(getResources().getColor(R.color.activity_download_btn_enable));
                         }
                     });

@@ -2,7 +2,26 @@
 <resources>
 
     <string name="action_settings">Settings</string>
-    <string name="app_name">RemoteCamera</string>
+    <string name="app_name">C-Video</string>
     <string name="refresh">Refresh</string>
+    <string name="permission_storage_message">存储权限被禁止将影响功能的正常使用,请到[应用管理]中授予"RemoteCamera"存储权限!</string>
+    <string name="go_grant">去授权</string>
+    <string name="permission_storage">存储权限!</string>
+    <string name="exit_app">退出</string>
+    <string name="empty_error_tip">没有连接到设备~</string>
+    <string name="ok">确定</string>
+    <string name="tip_delete_water_img">是否要删除此图片水印?</string>
+    <string name="tip_delete_text">是否要删除该文字吗?</string>
+    <string name="no_devices">你还没有连接到设备吆~</string>
+    <string name="not_support">暂不支持</string>
+    <string name="net_cache_min_value">设定值必须大于0(ms)</string>
+    <string name="reset_system">重置系统</string>
+    <string name="hotpot_has_closed">热点已关闭</string>
+    <string name="change_client_mode">更改设备状态</string>
+    <string name="change_hotpot_mode">更改热点状态</string>
+    <string name="hotspot_on">热点已打开</string>
+    <string name="hotspot_closed">热点已关闭</string>
+    <string name="format_sdcard">格式化存储卡</string>
+    <string name="photo_size">照片尺寸</string>
 
 </resources>

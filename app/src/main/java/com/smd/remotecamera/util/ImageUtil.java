@@ -16,6 +16,7 @@ import android.graphics.Typeface;
  */
 public class ImageUtil {
 
+
     /**
      * 设置水印图片在左上角
      *

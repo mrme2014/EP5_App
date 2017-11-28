@@ -1,24 +1,18 @@
 package com.qiaomu.libvideo;
 
-import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-
 import com.qiaomu.libvideo.utils.Config;
-import com.qiaomu.libvideo.utils.GetPathFromUri;
 import com.qiaomu.libvideo.utils.RecordSettings;
 import com.qiaomu.libvideo.utils.ToastUtils;
 import com.qiaomu.libvideo.view.CustomProgressDialog;
@@ -39,6 +33,12 @@ public class VideoTranscodeActivity extends AppCompatActivity {
     private TextView mVideoFilePathText;
     private TextView mVideoSizeText;
     private TextView mVideoBitrateText;
+
+    public static void startVideoTrancodeActivity(AppCompatActivity from,String filePath){
+        Intent intent=new Intent(from, VideoTranscodeActivity.class);
+        intent.putExtra("file_path",filePath);
+        from.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -73,43 +73,45 @@ public class VideoTranscodeActivity extends AppCompatActivity {
             }
         });
 
-        Intent intent = new Intent();
-        if (Build.VERSION.SDK_INT < 19) {
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.setType("video/*");
-        } else {
-            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("video/*");
-        }
-        startActivityForResult(Intent.createChooser(intent, "选择要转码的视频"), 0);
+//        Intent intent = new Intent();
+//        if (Build.VERSION.SDK_INT < 19) {
+//            intent.setAction(Intent.ACTION_GET_CONTENT);
+//            intent.setType("video/*");
+//        } else {
+//            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+//            intent.addCategory(Intent.CATEGORY_OPENABLE);
+//            intent.setType("video/*");
+//        }
+//        startActivityForResult(Intent.createChooser(intent, "选择要转码的视频"), 0);
+        String file_path = getIntent().getStringExtra("file_path");
+        onVideoFileSelected(file_path);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-            default:
-                break;
-        }
-        return true;
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case android.R.id.home:
+//                finish();
+//            default:
+//                break;
+//        }
+//        return true;
+//    }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            String selectedFilepath = GetPathFromUri.getPath(this, data.getData());
-            Log.i(TAG, "Select file: " + selectedFilepath);
-            if (!TextUtils.isEmpty(selectedFilepath)) {
-                onVideoFileSelected(selectedFilepath);
-                return;
-            }
-        }
-
-        //finish();
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (resultCode == Activity.RESULT_OK) {
+//            String selectedFilepath = GetPathFromUri.getPath(this, data.getData());
+//            Log.i(TAG, "Select file: " + selectedFilepath);
+//            if (!TextUtils.isEmpty(selectedFilepath)) {
+//                onVideoFileSelected(selectedFilepath);
+//                return;
+//            }
+//        }
+//
+//        //finish();
+//    }
 
     private void onVideoFileSelected(String filepath) {
         mShortVideoTranscoder = new PLShortVideoTranscoder(this, filepath, Config.TRANSCODE_FILE_PATH);
@@ -137,7 +139,7 @@ public class VideoTranscodeActivity extends AppCompatActivity {
             public void onSaveVideoSuccess(String s) {
                 Log.i(TAG, "save success: " + s);
                 mProcessingDialog.dismiss();
-                PlaybackActivity.start(VideoTranscodeActivity.this, s);
+                QiaomuPlaybackActivity.start(VideoTranscodeActivity.this, s);
             }
 
             @Override

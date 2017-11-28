@@ -1,1 +1,1 @@
-include ':app', ':imagefilter', ':libvideo'
+include ':app', ':imagefilter', ':libvideo', ':sharelib'

@@ -1,13 +1,16 @@
 package com.qiaomu.libvideo;
 
-import android.app.Activity;
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -23,20 +26,24 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-
+import com.qiaomu.libvideo.utils.AppUtils;
 import com.qiaomu.libvideo.utils.Config;
-import com.qiaomu.libvideo.utils.GetPathFromUri;
+import com.qiaomu.libvideo.utils.ToastUtils;
 import com.qiaomu.libvideo.view.CustomProgressDialog;
+import com.qiaomu.libvideo.view.ThumbnailView;
 import com.qiniu.pili.droid.shortvideo.PLShortVideoTrimmer;
 import com.qiniu.pili.droid.shortvideo.PLVideoFrame;
 import com.qiniu.pili.droid.shortvideo.PLVideoSaveListener;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class VideoTrimActivity extends Activity {
+import jczj.android.com.sharelib.ShareDialog;
+
+public class VideoTrimActivity extends AppCompatActivity {
     private static final String TAG = "VideoTrimActivity";
 
     private static final int SLICE_COUNT = 8;
@@ -46,6 +53,7 @@ public class VideoTrimActivity extends Activity {
     private LinearLayout mFrameListView;
     private View mHandlerLeft;
     private View mHandlerRight;
+    private ThumbnailView mThumbnailView;
 
     private CustomProgressDialog mProcessingDialog;
     private VideoView mPreview;
@@ -59,6 +67,18 @@ public class VideoTrimActivity extends Activity {
 
     private Handler mHandler = new Handler();
     private TextView duration;
+    private String file_path;
+    private String trimed_path;
+    private MediaScannerConnection msc;
+    private boolean isTrimOk;
+    private ImageView controllIv;
+    private int currentPosition;
+
+    public static void startTrimActivity(AppCompatActivity from, String filePath) {
+        Intent intent = new Intent(from, VideoTrimActivity.class);
+        intent.putExtra("file_path", filePath);
+        from.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,23 +95,16 @@ public class VideoTrimActivity extends Activity {
             }
         });
 
-        Intent intent = new Intent();
-        if (Build.VERSION.SDK_INT < 19) {
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.setType("video/*");
-        } else {
-            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("video/*");
-        }
 
-        startActivityForResult(Intent.createChooser(intent, "选择要导入的视频"), 0);
+        file_path = getIntent().getStringExtra("file_path");
+        init(file_path);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         play();
+        onShare();
     }
 
     @Override
@@ -135,24 +148,106 @@ public class VideoTrimActivity extends Activity {
 
     private void init(String videoPath) {
         setContentView(R.layout.activity_trim);
+        controllIv = (ImageView) findViewById(R.id.controllIv);
+        findViewById(R.id.done).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onDone();
+            }
+        });
+        findViewById(R.id.share).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShareDialog.newInstance(file_path).show(getSupportFragmentManager());
+            }
+        });
+
         duration = (TextView) findViewById(R.id.duration);
         mPreview = (VideoView) findViewById(R.id.preview);
+
         mShortVideoTrimmer = new PLShortVideoTrimmer(this, videoPath, Config.TRIM_FILE_PATH);
+        mThumbnailView = (ThumbnailView) findViewById(R.id.thumbnailView);
+        mThumbnailView.setMinInterval(1);
+        mThumbnailView.setOnScrollBorderListener(new ThumbnailView.OnScrollBorderListener() {
+            @Override
+            public void OnScrollBorder(float start, float end) {
+                changeTime();
+            }
+
+            @Override
+            public void onScrollStateChange() {
+
+            }
+        });
         initPreview(videoPath);
+
     }
 
+    private void changeTime() {
+
+        float left = mThumbnailView.getLeftInterval();
+        float beginPercent = left / mThumbnailView.getWidth();
+
+        mSelectedBeginMs = (int) (mDurationMs * beginPercent);
+
+        float right = mThumbnailView.getRightInterval();
+        float endPercent = right / mThumbnailView.getWidth();
+        mSelectedEndMs = (int) (mDurationMs * endPercent);
+
+        beginPercent = clamp(beginPercent);
+        endPercent = clamp(endPercent);
+        mSelectedBeginMs = (long) (beginPercent * mDurationMs);
+        mSelectedEndMs = (long) (endPercent * mDurationMs);
+        updateRangeText();
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     private void initPreview(String videoPath) {
 
         mSelectedEndMs = mDurationMs = mShortVideoTrimmer.getSrcDurationMs();
         duration.setText("时长: " + formatTime(mDurationMs));
-        Log.i(TAG, "video duration: " + mDurationMs);
         mVideoFrameCount = mShortVideoTrimmer.getVideoFrameCount(false);
-        Log.i(TAG, "video frame count: " + mVideoFrameCount);
         mPreview.setVideoPath(videoPath);
         mPreview.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 play();
+            }
+        });
+        mPreview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                controllIv.setVisibility(View.VISIBLE);
+                controllIv.animate().scaleX(3f).scaleY(3f).alpha(0.3f).setDuration(1000).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        controllIv.setVisibility(View.GONE);
+                    }
+                }).start();
+            }
+        });
+        mPreview.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (mPreview.isPlaying()) {
+                    currentPosition = mPreview.getCurrentPosition();
+                    controllIv.setImageResource(R.drawable.ic_play);
+                    controllIv.setVisibility(View.VISIBLE);
+                    controllIv.animate().scaleX(2f).scaleY(2f).start();
+                    mPreview.pause();
+                } else {
+                    mPreview.seekTo(currentPosition);
+                    mPreview.start();
+                    controllIv.setImageResource(R.drawable.ic_pause);
+                    controllIv.setVisibility(View.VISIBLE);
+                    controllIv.animate().scaleX(3f).scaleY(3f).alpha(0.3f).setDuration(1000).withEndAction(new Runnable() {
+                        @Override
+                        public void run() {
+                            controllIv.setVisibility(View.GONE);
+                        }
+                    }).start();
+                }
+                return false;
             }
         });
         initVideoFrameList();
@@ -162,7 +257,6 @@ public class VideoTrimActivity extends Activity {
         mFrameListView = (LinearLayout) findViewById(R.id.video_frame_list);
         mHandlerLeft = findViewById(R.id.handler_left);
         mHandlerRight = findViewById(R.id.handler_right);
-
         mHandlerLeft.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -271,20 +365,6 @@ public class VideoTrimActivity extends Activity {
         mHandlerRight.setLayoutParams(lp);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            String selectedFilepath = GetPathFromUri.getPath(this, data.getData());
-            Log.i(TAG, "Select file: " + selectedFilepath);
-            if (selectedFilepath != null && !"".equals(selectedFilepath)) {
-                init(selectedFilepath);
-            }
-        } else {
-            finish();
-        }
-    }
-
     private float clamp(float origin) {
         if (origin < 0) {
             return 0;
@@ -300,46 +380,74 @@ public class VideoTrimActivity extends Activity {
         float endPercent = 1.0f * ((mHandlerRight.getX() + mHandlerRight.getWidth() / 2) - mFrameListView.getX()) / mSlicesTotalLength;
         beginPercent = clamp(beginPercent);
         endPercent = clamp(endPercent);
-
-        Log.i(TAG, "begin percent: " + beginPercent + " end percent: " + endPercent);
-
         mSelectedBeginMs = (long) (beginPercent * mDurationMs);
         mSelectedEndMs = (long) (endPercent * mDurationMs);
 
-        Log.i(TAG, "new range: " + mSelectedBeginMs + "-" + mSelectedEndMs);
         updateRangeText();
         play();
     }
 
-    public void onDone(View v) {
-        Log.i(TAG, "trim to file path: " + Config.TRIM_FILE_PATH + " range: " + mSelectedBeginMs + " - " + mSelectedEndMs);
+    public void onDone() {
+        isTrimOk = false;
+        Log.i(TAG, "trim to file path: " + Config.TRIM_FILE_PATH + " range: " + mSelectedBeginMs + " - " + mSelectedEndMs + "--" + mDurationMs);
         mProcessingDialog.show();
-        mShortVideoTrimmer.trim(mSelectedBeginMs, mSelectedEndMs, new PLVideoSaveListener() {
-            @Override
-            public void onSaveVideoSuccess(String path) {
-                mProcessingDialog.dismiss();
-                Log.e(TAG, "onSaveVideoSuccess: " + path);
-                PlaybackActivity.start(VideoTrimActivity.this, path);
-                // initPreview(path);
-                //  VideoEditActivity.start(VideoTrimActivity.this, path);
-            }
+        try {
+            mShortVideoTrimmer.trim(Math.max(1, mSelectedBeginMs), Math.min(mSelectedEndMs - 1, mDurationMs), PLShortVideoTrimmer.TRIM_MODE.FAST, new PLVideoSaveListener() {
+                @Override
+                public void onSaveVideoSuccess(String path) {
+                    isTrimOk = true;
+                    renameFile(path);
+                }
 
-            @Override
-            public void onSaveVideoFailed(int errorCode) {
-                mProcessingDialog.dismiss();
-                Log.e(TAG, "trim video failed, error code: " + errorCode);
-            }
+                @Override
+                public void onSaveVideoFailed(int errorCode) {
+                    mProcessingDialog.dismiss();
+                }
 
-            @Override
-            public void onSaveVideoCanceled() {
-                mProcessingDialog.dismiss();
-            }
+                @Override
+                public void onSaveVideoCanceled() {
+                    mProcessingDialog.dismiss();
+                }
 
+                @Override
+                public void onProgressUpdate(float percentage) {
+                    mProcessingDialog.setProgress((int) (100 * percentage));
+                }
+            });
+        } catch (Exception e) {
+            showFailedDialog();
+        } catch (Throwable throwable) {
+            showFailedDialog();
+        }
+
+    }
+
+    private void showFailedDialog() {
+        AppUtils.showAlertDialog(VideoTrimActivity.this, "抱歉,我已经尽力了,但裁剪还是失败了", R.string.cancel, R.string.ok, new DialogInterface.OnClickListener() {
             @Override
-            public void onProgressUpdate(float percentage) {
-                mProcessingDialog.setProgress((int) (100 * percentage));
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
             }
         });
+    }
+
+    private void renameFile(String path) {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ToastUtils.s(VideoTrimActivity.this, "视频已保存到/sdcard/C-Video/Trim文件夹下");
+                mProcessingDialog.dismiss();
+                QiaomuPlaybackActivity.start(VideoTrimActivity.this, trimed_path);
+            }
+        }, 1000);
+        File original = new File(file_path);
+        File trimmedFile = new File(path);
+        String fileName = original.getName();
+        String prefix = fileName.split("\\.")[0] + ".mp4";
+        String rename = "trimmed_" + formatTime(mSelectedBeginMs) + "_" + formatTime(mSelectedEndMs) + "_" + prefix;
+        final String renamePath = Config.FILE_PATH_TRIMMED + "/" + rename;
+        AppUtils.renameFile(VideoTrimActivity.this, Config.FILE_PATH_TRIMMED, rename, path, !TextUtils.equals(file_path, path));
+        trimed_path = renamePath;
     }
 
     public void onBack(View v) {
@@ -357,5 +465,17 @@ public class VideoTrimActivity extends Activity {
     private void updateRangeText() {
         TextView range = (TextView) findViewById(R.id.range);
         range.setText("剪裁范围: " + formatTime(mSelectedBeginMs) + " - " + formatTime(mSelectedEndMs));
+    }
+
+    public void onShare() {
+        if (TextUtils.isEmpty(trimed_path)) {
+            return;
+        }
+        ShareDialog.newInstance(trimed_path).show(getSupportFragmentManager());
+    }
+
+    @Override
+    public String getPackageName() {
+        return !isTrimOk ? "com.qiniu.pili.droid.shortvideo.demo" : super.getPackageName();
     }
 }

@@ -1,20 +1,35 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 23
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId "com.smd.remotecamera"
         minSdkVersion 19
-        targetSdkVersion 25
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
-
+        multiDexEnabled true
     }
+
+    signingConfigs {
+        releaseConfig {
+            storeFile file('../key.jks')
+            storePassword '123456'
+            keyAlias 'alias'
+            keyPassword '123456'
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+            signingConfig signingConfigs.releaseConfig
+        }
+
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.releaseConfig
         }
     }
     packagingOptions {
@@ -28,7 +43,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-
     testCompile 'junit:junit:4.12'
     compile files('libs/commons-codec-1.9.jar')
     compile files('libs/commons-logging-1.2.jar')
@@ -39,11 +53,19 @@ dependencies {
     compile files('libs/httpcore-4.4.4.jar')
     compile files('libs/httpmime-4.5.2.jar')
     compile files('libs/NTYKitModel.jar')
-    compile 'com.android.support:recyclerview-v7:25.3.1'
-    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:recyclerview-v7:23.2.1'
+    compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.okhttp3:okhttp-apache:3.9.0'
     compile 'com.squareup.okio:okio:1.13.0'
+    compile 'com.android.support:multidex:1.0.0'
+    //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.1.9
+    compile 'com.tencent.bugly:crashreport:latest.release'
+    //compile 'com.tencent.bugly:nativecrashreport:latest.release'
+
+    // compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     compile project(':imagefilter')
     compile project(':libvideo')
+
+
 }

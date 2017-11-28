@@ -1,5 +1,7 @@
 package com.smd.remotecamera.fragment;
 
+import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -8,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.smd.remotecamera.R;
@@ -20,7 +23,7 @@ import java.util.List;
 
 public class RemoteFileListFragment extends Fragment implements View.OnClickListener {
 
-    private ImageButton mIbBack;
+    private ImageView mIbBack;
     private TextView mTvVideo;
     private TextView mTvPhoto;
     private ViewPager mVp;
@@ -33,9 +36,17 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
     private ViewPager.OnPageChangeListener mExtOnPageChangeListener;
 
     private boolean mIsSingle;
+    private String mNameType;
+    private ViewPager.OnPageChangeListener mOnPageChangeListener1;
+    ProgressDialog mProgressDialog;
 
-    public RemoteFileListFragment(boolean single) {
+    public RemoteFileListFragment() {
+    }
+
+    @SuppressLint("ValidFragment")
+    public RemoteFileListFragment(boolean single, @FileListAdapter.FileNameType String nameType) {
         mIsSingle = single;
+        mNameType = nameType;
     }
 
     @Nullable
@@ -44,11 +55,14 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
         View view = inflater.inflate(R.layout.fragment_remotefile_list, container, false);
         initView(view);
         init();
+        mProgressDialog = new ProgressDialog(getContext());
+        mProgressDialog.setMessage("正在努力加载中...");
+        mProgressDialog.show();
         return view;
     }
 
     private void initView(View view) {
-        mIbBack = (ImageButton) view.findViewById(R.id.fragment_remotefile_ib_back);
+        mIbBack = (ImageView) view.findViewById(R.id.fragment_remotefile_ib_back);
         mTvVideo = (TextView) view.findViewById(R.id.fragment_remotefile_tv_video);
         mTvPhoto = (TextView) view.findViewById(R.id.fragment_remotefile_tv_photo);
         mVp = (ViewPager) view.findViewById(R.id.fragment_remotefile_vp);
@@ -63,11 +77,20 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
 
     private void init() {
         List<Fragment> data = new ArrayList<>();
-        mVideoListFragment = new ListFragment(mIsSingle);
-        mPhotoListFragment = new ListFragment(mIsSingle);
+
+        mVideoListFragment = new ListFragment(mNameType);
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isSingle", mIsSingle);
+        mVideoListFragment.setArguments(bundle);
+
+        mPhotoListFragment = new ListFragment(mNameType);
+        Bundle bundle1 = new Bundle();
+        bundle1.putBoolean("isSingle", mIsSingle);
+        mPhotoListFragment.setArguments(bundle1);
+
         mVideoListFragment.setOnCheckedNumChangedListener(mOnCheckedNumChangedListener);
         mPhotoListFragment.setOnCheckedNumChangedListener(mOnCheckedNumChangedListener);
-        mOnCheckedNumChangedListener = null;
+        //mOnCheckedNumChangedListener = null;
         data.add(mVideoListFragment);
         data.add(mPhotoListFragment);
         RemoteFileListPagerAdapter adapter = new RemoteFileListPagerAdapter(getChildFragmentManager(), data);
@@ -75,6 +98,7 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
     }
 
     public void setData(List<RemoteFileBean> videoData, List<RemoteFileBean> photoData) {
+        mProgressDialog.dismiss();
         mVideoListFragment.setData(videoData);
         mPhotoListFragment.setData(photoData);
     }
@@ -116,11 +140,18 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
         @Override
         public void onPageSelected(int position) {
             changeTopMode(position);
+            if (mOnPageChangeListener1 != null)
+                mOnPageChangeListener1.onPageSelected(position);
         }
     };
 
     public void setOnClickBackListener(OnClickBackListener onClickBackListener) {
         mOnClickBackListener = onClickBackListener;
+    }
+
+    public void setonPagerSelectListener(ViewPager.OnPageChangeListener onPageChangeListener) {
+
+        mOnPageChangeListener1 = onPageChangeListener;
     }
 
     public interface OnClickBackListener {
