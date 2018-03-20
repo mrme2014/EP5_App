@@ -109,4 +109,14 @@ public class RemoteFileBean {
     public boolean isHasEdit() {
         return mExists;
     }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    boolean isSelected;
+
+    public void setSelect(boolean select) {
+        isSelected = select;
+    }
 }

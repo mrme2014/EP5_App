@@ -3,6 +3,7 @@ package com.smd.remotecamera.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -10,8 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.PlaybackActivity;
+import com.qiaomu.libvideo.QiaomuPlaybackActivity;
+import com.qiaomu.libvideo.VideoTrimActivity;
 import com.qiaomu.libvideo.utils.AppUtils;
 import com.qiaomu.libvideo.utils.TimeUtils;
 import com.smd.remotecamera.R;
@@ -36,6 +42,8 @@ import java.util.Set;
 
 public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.MyHolder> implements CompoundButton.OnCheckedChangeListener,
         DownloadCore.OnDownloadProgressChangedListener {
+
+
     public @interface FileNameType {
         String ORIGINAL = "";
         String DOWNLOAD = "A";
@@ -74,7 +82,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.MyHold
     public MyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.item_rv_filelist, parent, false);
         MyHolder myHolder = new MyHolder(view);
-        mCBSet.add(myHolder.cb);
+        //mCBSet.add(myHolder.cb);
         return myHolder;
     }
 
@@ -98,7 +106,8 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.MyHold
 
         holder.tvTime.setText(TimeUtils.format(fileBean.getDate()) + format);
         holder.tvSize.setText(Util.getSizeOfM(fileBean.getSize()));
-        holder.cb.setChecked(mCheckMap.get(position) == null ? false : mCheckMap.get(position));
+        // holder.cb.setChecked(mCheckMap.get(position) == null ? false : mCheckMap.get(position));
+        holder.cb.setImageResource(fileBean.isSelected() ? R.drawable.donw_check_yes : R.drawable.donw_check_no);
         holder.rpb.setVisibility(mDownloadMap.get(position) == null ? View.GONE : View.VISIBLE);
 
         String thumbFileName = fileBean.getName().split("\\.")[0] + "." + FileConstants.POSTFIX_PHOTO;
@@ -122,14 +131,50 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.MyHold
             public void onClick(View v) {
                 if (!fileBean.getName().endsWith(FileConstants.POSTFIX_PHOTO)) {
                     String file_path = FileConstants.LOCAL_VIDEO_PATH + File.separator + fileBean.getName();
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(AppUtils.getUri(mContext, file_path), "video/*");
-                    mContext.startActivity(intent);
+                    File file = new File(file_path);
+                    if (!file.exists()) {
+                        file_path = fileBean.getUrl().toString();
+                        //file_path = "rtsp://192.168.1.254/" + fileBean.getName();
+//                        QiaomuPlaybackActivity.start(mContext, file_path);
+//                        Intent intent = new Intent(Intent.ACTION_VIEW);
+//                        intent.setDataAndType(AppUtils.getUri(mContext, file_path), "video/*");
+//                        mContext.startActivity(intent);
+//                        VideoTrimActivity.startTrimActivity(mContext, fileBean.getUrl().toString(), false);
+                        Intent intent = new Intent(mContext, PlaybackActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("url", file_path);
+                        intent.putExtras(bundle);
+                        mContext.startActivity(intent);
+                        return;
+                    }
+                    VideoTrimActivity.startTrimActivity(mContext, file_path, false);
+//                    QiaomuPlaybackActivity.start(mContext, file_path);
+//                    Intent intent = new Intent(Intent.ACTION_VIEW);
+//                    intent.setDataAndType(AppUtils.getUri(mContext, file_path), "video/*");
+//                    mContext.startActivity(intent);
                 }
             }
         });
 
+        holder.cb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCheckedData.size() != 0 && mCheckedData.get(0) != fileBean) {
+                    RemoteFileBean remoteFileBean = mCheckedData.get(0);
+                    remoteFileBean.setSelect(false);
+                    notifyItemChanged(mData.indexOf(remoteFileBean));
+                }
+                fileBean.setSelect(!fileBean.isSelected());
+                holder.cb.setImageResource(fileBean.isSelected() ? R.drawable.donw_check_yes : R.drawable.donw_check_no);
+                mCheckedData.clear();
+                if (fileBean.isSelected()) {
+                    mCheckedData.add(fileBean);
+                } else {
 
+                }
+                mOnCheckedNumChangedListener.onCheckedNumChanged(mCheckedData, FileListAdapter.this);
+            }
+        });
     }
 
     @Override
@@ -170,7 +215,7 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.MyHold
                                 roundProgressBar.setVisibility(View.GONE);
                                 mDownloadMap.remove(index);
                             } else {
-//
+
                             }
                         }
                     });
@@ -180,8 +225,8 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.MyHold
     }
 
     public class MyHolder extends RecyclerView.ViewHolder {
-        private SquareImageView iv;
-        private CheckBox cb;
+        private ImageView iv;
+        private ImageView cb;
         private TextView tvDate;
         private TextView tvTime;
         private TextView tvSize;
@@ -189,54 +234,64 @@ public class FileListAdapter extends RecyclerView.Adapter<FileListAdapter.MyHold
 
         public MyHolder(View itemView) {
             super(itemView);
-            iv = (SquareImageView) itemView.findViewById(R.id.item_rv_filelist_iv);
-            cb = (CheckBox) itemView.findViewById(R.id.item_rv_filelist_cb);
+            iv = (ImageView) itemView.findViewById(R.id.item_rv_filelist_iv);
+            cb = (ImageView) itemView.findViewById(R.id.item_rv_filelist_cb);
             tvDate = (TextView) itemView.findViewById(R.id.item_rv_filelist_tv_date);
             tvTime = (TextView) itemView.findViewById(R.id.item_rv_filelist_tv_time);
             tvSize = (TextView) itemView.findViewById(R.id.item_rv_filelist_tv_size);
             rpb = (RoundProgressBar) itemView.findViewById(R.id.item_rv_filelist_rpb_download);
-            try {
-                cb.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (cb != null) {
-                            if (cb.isChecked()) {
-                                if (mIsSingle) {
-                                    mCheckMap.clear();
-                                    mCheckedData.clear();
-                                    for (CheckBox checkBox : mCBSet) {
-                                        if (!cb.equals(checkBox)) {
-                                            checkBox.setChecked(false);
-                                        }
-                                    }
-                                }
-                                mCheckMap.put((Integer) cb.getTag(), true);
-                                // mCheckedData.add(mData.get((Integer) cb.getTag()));
-                            } else {
-                                mCheckMap.remove((Integer) cb.getTag());
-                                //  boolean remove = mCheckedData.remove(mData.get((Integer) cb.getTag()));
-                            }
-                            if (mOnCheckedNumChangedListener != null) {
-                                mCheckedData.clear();
-                                Set<Integer> integers = mCheckMap.keySet();
-                                Iterator<Integer> iterator = integers.iterator();
-                                while (iterator.hasNext()) {
-                                    Integer next = iterator.next();
-                                    mCheckedData.add(mData.get(next.intValue()));
-                                }
-                                mOnCheckedNumChangedListener.onCheckedNumChanged(mCheckedData, FileListAdapter.this);
-                            }
-                        }
-                    }
-                });
-            } catch (Exception e) {
-            }
+
+//            try {
+//                cb.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        if (cb != null) {
+//                            if (cb.isChecked()) {
+//                                if (mIsSingle) {
+//                                    mCheckMap.clear();
+//                                    mCheckedData.clear();
+//                                    for (CheckBox checkBox : mCBSet) {
+//                                        if (!cb.equals(checkBox)) {
+//                                            checkBox.setChecked(false);
+//                                        }
+//                                    }
+//                                }
+//                                mCheckMap.put((Integer) cb.getTag(), true);
+//                                // mCheckedData.add(mData.get((Integer) cb.getTag()));
+//                            } else {
+//                                mCheckMap.remove((Integer) cb.getTag());
+//                                //  boolean remove = mCheckedData.remove(mData.get((Integer) cb.getTag()));
+//                            }
+//                            if (mOnCheckedNumChangedListener != null) {
+//                                mCheckedData.clear();
+//                                Set<Integer> integers = mCheckMap.keySet();
+//                                Iterator<Integer> iterator = integers.iterator();
+//                                while (iterator.hasNext()) {
+//                                    Integer next = iterator.next();
+//                                    mCheckedData.add(mData.get(next.intValue()));
+//                                }
+//                                mOnCheckedNumChangedListener.onCheckedNumChanged(mCheckedData, FileListAdapter.this);
+//                            }
+//                        }
+//                    }
+//                });
+//            } catch (Exception e) {
+//            }
         }
 
         public void setTag(int tag) {
             cb.setTag(tag);
             rpb.setTag(tag);
         }
+    }
+
+    public void onDelete(int index) {
+        if (index > mData.size())
+            return;
+        mData.remove(index);
+        mCheckMap.put(index, false);
+        mCheckedData.clear();
+        notifyDataSetChanged();
     }
 
     @Override

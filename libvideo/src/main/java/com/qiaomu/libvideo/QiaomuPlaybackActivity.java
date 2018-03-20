@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -42,7 +43,7 @@ public class QiaomuPlaybackActivity extends Activity implements
     private boolean mIsUpload = false;
     private String mVideoPath;
 
-    public static void start(Activity activity, String mp4Path) {
+    public static void start(Context activity, String mp4Path) {
         Intent intent = new Intent(activity, QiaomuPlaybackActivity.class);
         intent.putExtra(MP4_PATH, mp4Path);
         activity.startActivity(intent);
@@ -71,7 +72,7 @@ public class QiaomuPlaybackActivity extends Activity implements
         mVideoPath = getIntent().getStringExtra(MP4_PATH);
         mVideoView.setLooping(true);
         mVideoView.setAVOptions(new AVOptions());
-        mVideoView.setVideoPath(mVideoPath);
+        mVideoView.setVideoURI(Uri.parse(mVideoPath));
         MediaController mediaController = new MediaController(this, true, false);
         mediaController.setOnClickSpeedAdjustListener(mOnClickSpeedAdjustListener);
         mVideoView.setMediaController(mediaController);

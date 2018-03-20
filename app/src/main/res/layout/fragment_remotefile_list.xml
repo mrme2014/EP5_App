@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ffffff"
     android:orientation="vertical">
 
     <FrameLayout
@@ -47,6 +48,6 @@
         android:id="@+id/fragment_remotefile_vp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/activity_download_btn_disable" />
+        android:background="#ffffff" />
 
 </LinearLayout>

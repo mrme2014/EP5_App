@@ -13,28 +13,32 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ntk.nvtkit.NVTKitModel;
+import com.ntk.util.DefineTable;
 import com.qiaomu.libvideo.utils.AppUtils;
+import com.qiaomu.libvideo.utils.ToastUtils;
+import jczj.android.com.sharelib.RoundProgressDialog;
 import com.smd.remotecamera.R;
 import com.smd.remotecamera.controller.CameraController;
 import com.smd.remotecamera.service.WifiConnectBroadcastReciver;
 import com.smd.remotecamera.service.WifiConnectInterface;
 import com.smd.remotecamera.util.CommonUtil;
+import com.smd.remotecamera.util.SpUtils;
 import com.smd.remotecamera.util.Util;
 
 import org.videolan.libvlc.VideoInterface;
@@ -55,6 +59,8 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
     private TextView mTvREC;
     private ImageView imageView;
     private ProgressDialog mProgressDialog;
+    private TextView movies;
+    private ImageView battery;
 
     private static int mCameraWidth;
     private static int mCameraHeight;
@@ -63,6 +69,7 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
     private boolean mIsVideo = false;
     private boolean mNeedTakePhoto = false;
     private boolean mIsConnected = false;
+    private boolean isSuccess, isPause;
 
     private CameraController mCameraController;
     private WifiConnectBroadcastReciver mBroadcastReciver;
@@ -77,6 +84,7 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            queryBatterySate();
         }
     };
 
@@ -84,6 +92,7 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_camera_new);
 
         initView();
@@ -91,21 +100,87 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
         requestpermissions();
         reigisterBroadcastReciver();
         ShareUtil.registWx(this);
+        queryBatterySate();
+        checkStorageState();
+        //writeFile();
 
     }
 
+    private void checkStorageState() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final String result3 = NVTKitModel.qryCardStatus();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+
+                                switch (result3) {
+                                    case DefineTable.NVTKitCardStatus_NumFull:
+                                    case DefineTable.NVTKitCardStatus_NotInit:
+                                    case DefineTable.NVTKitCardStatus_UnknownFormat:
+                                    case DefineTable.NVTKitCardStatus_Removed:
+                                        ToastUtils.s(CameraActivity.this, "请插入内存卡");
+                                        break;
+                                }
+                            } catch (Exception e) {
+                            }
+
+                        }
+                    });
+                } catch (Exception e) {
+                } catch (Throwable e) {
+                }
+            }
+        }).start();
+    }
+
+    private void queryBatterySate() {
+        mHandler.sendEmptyMessageDelayed(0, 2000);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final String batteryStatus = NVTKitModel.qryBatteryStatus();
+                    if (TextUtils.isEmpty(batteryStatus))
+                        return;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            switch (batteryStatus) {
+                                case DefineTable.NVTKitBatterStatus_FULL:
+                                    battery.setImageResource(R.drawable.ic_battery3);
+                                    break;
+                                case DefineTable.NVTKitBatterStatus_MED:
+                                    battery.setImageResource(R.drawable.ic_battery2);
+                                    break;
+                                case DefineTable.NVTKitBatterStatus_LOW:
+                                case DefineTable.NVTKitBatterStatus_EMPTY:
+                                case DefineTable.NVTKitBatterStatus_Exhausted:
+                                    battery.setImageResource(R.drawable.ic_battery1);
+                                    break;
+                                case DefineTable.NVTKitBatterStatus_CHARGE:
+                                    battery.setImageResource(R.drawable.ic_battery4);
+                                    break;
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                } catch (Throwable e) {
+                }
+            }
+        }).start();
+    }
 
     private void reigisterBroadcastReciver() {
 
         mBroadcastReciver = new WifiConnectBroadcastReciver(new WifiConnectInterface() {
             @Override
             public void onConnected() {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        postDelayChangedMode();
-                    }
-                }, 1500);
+                postDelayChangedMode();
                 mIsConnected = true;
             }
 
@@ -150,43 +225,86 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isPause = true;
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        postDelayChangedMode();
+
+        movies.setText(SpUtils.get("movie"));
+        if (isSuccess && isPause) postDelayChangedMode();
+
+        isPause = false;
     }
 
     private void postDelayChangedMode() {
-        mCameraController.changeMode(NVTKitModel.MODE_MOVIE);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 while (mCheckSize) {
+                    try {
+                        mCameraController.changeMode(NVTKitModel.MODE_PHOTO);
+                        //mCameraController.changeMode(NVTKitModel.MODE_PHOTO);
+                    } catch (Exception e) {
+                    }
                     if ((mCameraWidth != 0) && (mCameraHeight != 0)) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                isSuccess = true;
                                 resizeSurfaceView();
                             }
                         });
                         break;
                     }
-                    SystemClock.sleep(500);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }).start();
     }
 
     private void resizeSurfaceView() {
-        if (mCameraWidth == 0 || mCameraHeight == 0)
-            return;
-        ViewGroup.LayoutParams lp = mSurfaceView.getLayoutParams();
-        Pair<Integer, Integer> screenSize = Util.getScreenSize(CameraActivity.this);
-        lp.width = screenSize.first;
-        lp.height = screenSize.first / mCameraWidth * mCameraHeight;
-        mSurfaceView.setLayoutParams(lp);
-        mSurfaceView.invalidate();
+        try {
+            if (mCameraWidth == 0 || mCameraHeight == 0)
+                return;
+            FrameLayout cameraLayout = (FrameLayout) findViewById(R.id.cameraLayout);
+            if (isPortrait) {
+                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mSurfaceView.getLayoutParams();
+                Pair<Integer, Integer> screenSize = Util.getScreenSize(CameraActivity.this);
+                lp.width = screenSize.first;
+                lp.height = screenSize.first / mCameraWidth * mCameraHeight;
+                lp.gravity = Gravity.CENTER;
+
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, Util.dip2px(this, 200));
+                cameraLayout.setLayoutParams(layoutParams);
+
+                mSurfaceView.setLayoutParams(lp);
+                mSurfaceView.invalidate();
+            } else {
+                FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mSurfaceView.getLayoutParams();
+                Pair<Integer, Integer> screenSize = Util.getScreenSize(CameraActivity.this);
+                lp.width = screenSize.first;
+                lp.height = screenSize.first;
+                lp.gravity = Gravity.CENTER;
+
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(-1, -1);
+                cameraLayout.setLayoutParams(layoutParams);
+
+                mSurfaceView.setLayoutParams(lp);
+                mSurfaceView.invalidate();
+            }
+
+        } catch (Exception e) {
+        }
+
     }
 
     @Override
@@ -196,15 +314,20 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
         }
         mCheckSize = false;
         unregisterReceiver(mBroadcastReciver);
+        mHandler.removeCallbacksAndMessages(null);
+        NVTKitModel.releaseNVTKitModel();
         super.onDestroy();
     }
 
     private void init() {
+        //new NVTKitModel(this);
         mCameraController = new CameraController(this, this, mVideoHandler, mSurfaceHolder, mSurfaceView);
         mCameraController.setOnCameraControllerListener(mOnCameraControllerListener);
     }
 
     private void initView() {
+        battery = (ImageView) findViewById(R.id.battery);
+        movies = (TextView) findViewById(R.id.movie);
         mSurfaceView = (SurfaceView) findViewById(R.id.camera_sv);
         mSurfaceHolder = mSurfaceView.getHolder();
         mIbPhoto = (ImageView) findViewById(R.id.camera_ib_camera);
@@ -237,19 +360,20 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
                 startActivity(new Intent(CameraActivity.this, MenuActivity.class));
             }
         });
+
     }
 
 
     private void showTopPb() {
         if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("请稍后...");
+            mProgressDialog = new RoundProgressDialog(this);
+            mProgressDialog.setCanceledOnTouchOutside(true);
         }
         mProgressDialog.show();
     }
 
     private void hideTopPb() {
-        mProgressDialog.dismiss();
+        if (mProgressDialog != null && mProgressDialog.isShowing()) mProgressDialog.dismiss();
     }
 
     @Override
@@ -261,6 +385,18 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
         resizeSurfaceView();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("mIsVideo", mIsVideo);
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) mIsVideo = savedInstanceState.getBoolean("mIsVideo");
+    }
 
     @Override
     public void onClick(View v) {
@@ -307,6 +443,7 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
         @Override
         public void onModeChanged(int mode) {
             emptylayout.setVisibility(View.GONE);
+            //hideTopPb();
         }
 
         @Override
@@ -342,6 +479,7 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
 
         @Override
         public void onChangedFailed() {
+            //hideTopPb();
             // emptylayout.setVisibility(View.VISIBLE);
         }
     };
@@ -354,23 +492,52 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
         }
     };
 
+    private boolean isPortrait = true;
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            isPortrait = true;
+            findViewById(R.id.titleBar).setVisibility(View.VISIBLE);
             mIbEdit.setVisibility(View.VISIBLE);
             mIbDownload.setVisibility(View.VISIBLE);
             resizeSurfaceView();
         } else {
+            isPortrait = false;
+            findViewById(R.id.titleBar).setVisibility(View.GONE);
             mIbEdit.setVisibility(View.GONE);
             mIbDownload.setVisibility(View.GONE);
             resizeSurfaceView();
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
 
+    public void writeFile() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                InputStream is = getResources().openRawResource(R.raw.raw);
+//                try {
+//                    File file = new File(FileConstants.LOCAL_VIDEO_PATH, "2000_0101_021108.MOV");
+//                    if (!file.exists())
+//                        file.createNewFile();
+//                    FileOutputStream fileOutputStream = new FileOutputStream(file);
+//                    byte[] buffers = new byte[1024];
+//                    int len = 0;
+//                    while ((len = is.read()) != -1) {
+//                        is.read(buffers,0,len);
+//                        fileOutputStream.write(buffers);
+//                    }
+//                    is.close();
+//                    fileOutputStream.close();
+//                } catch (FileNotFoundException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+        //2000_0101_021108
     }
 }

@@ -65,7 +65,7 @@ public class ImageEditActivity extends AppCompatActivity implements RadioGroup.O
     public static final int FILTER = 3;
 
     private ImageView mIbBack;
-    private ImageButton mIbOk;
+    private TextView mIbOk;
     private FrameLayout mContainer;
     private RadioGroup mRgMenu;
     private RadioButton mRb1;
@@ -167,7 +167,7 @@ public class ImageEditActivity extends AppCompatActivity implements RadioGroup.O
         waterLayout = (RelativeLayout) findViewById(R.id.waterLayout);
         cacheLayout = (FrameLayout) findViewById(R.id.cacheLayout);
         mIbBack = (ImageView) findViewById(R.id.activity_imageedit_ib_back);
-        mIbOk = (ImageButton) findViewById(R.id.activity_imageedit_ib_ok);
+        mIbOk = (TextView) findViewById(R.id.activity_imageedit_ib_ok);
         mContainer = (FrameLayout) findViewById(R.id.activity_imageedit_bottom_container);
         mRgMenu = (RadioGroup) findViewById(R.id.activity_imageedit_rg);
         mRb1 = (RadioButton) findViewById(R.id.activity_imageedit_rb_1);
@@ -264,7 +264,7 @@ public class ImageEditActivity extends AppCompatActivity implements RadioGroup.O
                 break;
             case R.id.activity_imageedit_ib_ok:
                 save();
-                CommonUtil.showToast(getApplicationContext(), "保存成功");
+                //CommonUtil.showToast(getApplicationContext(), "保存成功");
                 break;
             case R.id.tv_close:
                 changeTextState(!(rl_edit_text.getVisibility() == View.VISIBLE));
@@ -289,7 +289,7 @@ public class ImageEditActivity extends AppCompatActivity implements RadioGroup.O
             edit_path = FileConstants.LOCAL_EDIT_PATH + "/" + filename;
             AppUtils.insertImage(this, edit_path);
             ShareDialog.newInstance(edit_path).show(getSupportFragmentManager());
-            Toast.makeText(getApplicationContext(), "图片已保存到/sdcard/C-Video/Edit目录下", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "图片已保存到/sdcard/C-Video/Edit目录下", Toast.LENGTH_LONG).show();
         } catch (IOException e) {
             e.printStackTrace();
         }

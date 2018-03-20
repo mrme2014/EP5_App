@@ -2,6 +2,7 @@ package com.smd.remotecamera.controller;
 
 
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.ntk.nvtkit.NVTKitModel;
 import com.ntk.util.ParseResult;
@@ -10,6 +11,7 @@ import com.smd.remotecamera.bean.RemoteFileBean;
 import com.smd.remotecamera.constants.FileConstants;
 import com.smd.remotecamera.core.ImageDownloaderTask;
 import com.smd.remotecamera.util.CommonUtil;
+import com.smd.remotecamera.util.SpUtils;
 import com.smd.remotecamera.view.SquareImageView;
 
 import java.io.File;
@@ -37,6 +39,8 @@ public class RemoteFileController {
                 if (result != null && result.getFileItemList() != null) {
                     for (int i = 0; i < result.getFileItemList().size(); i++) {
                         final String name = result.getFileItemList().get(i).NAME;
+                        if (SpUtils.hasKey(name))
+                            continue;
                         String urlStr = result.getFileItemList().get(i).FPATH;
                         URL url = getURLFromPath(urlStr);
                         long size = Long.valueOf(result.getFileItemList().get(i).SIZE);
@@ -86,7 +90,7 @@ public class RemoteFileController {
         return url;
     }
 
-    public void loadImage(SquareImageView iv, String url, String name) {
+    public void loadImage(ImageView iv, String url, String name) {
         new ImageDownloaderTask(iv).execute(url, name);
     }
 

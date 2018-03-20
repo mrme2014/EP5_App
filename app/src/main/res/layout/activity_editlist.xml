@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#ffffff">
 
     <LinearLayout
         android:id="@+id/activity_downloadfilelist_ll"
@@ -15,6 +16,16 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/activity_downloadfilelist_ib_delete"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:background="@color/activity_download_btn_disable"
+                android:paddingBottom="@dimen/activity_download_bottomtop_padding"
+                android:paddingTop="@dimen/activity_download_bottomtop_padding"
+                android:src="@drawable/bottom_delete" />
 
             <TextView
                 android:id="@+id/activity_editfilelist_tv_cut"
@@ -45,7 +56,8 @@
                 android:paddingBottom="@dimen/activity_download_bottomtop_padding"
                 android:paddingTop="@dimen/activity_download_bottomtop_padding"
                 android:text="压缩"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="2px"
@@ -65,7 +77,7 @@
                 android:paddingTop="@dimen/activity_download_bottomtop_padding"
                 android:text="转MOV"
                 android:textSize="15sp"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
             <TextView
                 android:layout_width="2px"
@@ -85,7 +97,7 @@
                 android:paddingTop="@dimen/activity_download_bottomtop_padding"
                 android:text="转MP4"
                 android:textSize="15sp"
-                />
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -95,6 +107,16 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/activity_downloadfilelist_ib_delete1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:background="@color/activity_download_btn_disable"
+                android:paddingBottom="@dimen/activity_download_bottomtop_padding"
+                android:paddingTop="@dimen/activity_download_bottomtop_padding"
+                android:src="@drawable/bottom_delete" />
 
             <ImageButton
                 android:id="@+id/activity_editfilelist_ib_shui"
@@ -132,10 +154,17 @@
         </LinearLayout>
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:layout_below="@+id/activity_editfilelist_container"
+        android:background="#e1e1e1"></View>
+
     <FrameLayout
         android:id="@+id/activity_editfilelist_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/activity_downloadfilelist_ll" />
+        android:layout_above="@id/activity_downloadfilelist_ll"
+        android:paddingBottom="@dimen/dp5" />
 
 </RelativeLayout>

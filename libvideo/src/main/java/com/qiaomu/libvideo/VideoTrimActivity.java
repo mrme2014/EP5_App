@@ -1,21 +1,27 @@
 package com.qiaomu.libvideo;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
@@ -42,6 +48,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import jczj.android.com.sharelib.ShareDialog;
+import okhttp3.internal.Util;
 
 public class VideoTrimActivity extends AppCompatActivity {
     private static final String TAG = "VideoTrimActivity";
@@ -73,10 +80,16 @@ public class VideoTrimActivity extends AppCompatActivity {
     private boolean isTrimOk;
     private ImageView controllIv;
     private int currentPosition;
+    private boolean trim;
 
-    public static void startTrimActivity(AppCompatActivity from, String filePath) {
+    public static void startTrimActivity(Context from, String filePath) {
+        startTrimActivity(from, filePath, true);
+    }
+
+    public static void startTrimActivity(Context from, String filePath, boolean trim) {
         Intent intent = new Intent(from, VideoTrimActivity.class);
         intent.putExtra("file_path", filePath);
+        intent.putExtra("trim", trim);
         from.startActivity(intent);
     }
 
@@ -97,6 +110,7 @@ public class VideoTrimActivity extends AppCompatActivity {
 
 
         file_path = getIntent().getStringExtra("file_path");
+        trim = getIntent().getBooleanExtra("trim", true);
         init(file_path);
     }
 
@@ -118,6 +132,8 @@ public class VideoTrimActivity extends AppCompatActivity {
         super.onDestroy();
         if (mShortVideoTrimmer != null) {
             mShortVideoTrimmer.destroy();
+            mPreview.stopPlayback();
+            stopTrackPlayProgress();
         }
     }
 
@@ -155,12 +171,6 @@ public class VideoTrimActivity extends AppCompatActivity {
                 onDone();
             }
         });
-        findViewById(R.id.share).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ShareDialog.newInstance(file_path).show(getSupportFragmentManager());
-            }
-        });
 
         duration = (TextView) findViewById(R.id.duration);
         mPreview = (VideoView) findViewById(R.id.preview);
@@ -179,8 +189,17 @@ public class VideoTrimActivity extends AppCompatActivity {
 
             }
         });
+
         initPreview(videoPath);
 
+        if (!trim) {
+            TextView title = (TextView) findViewById(R.id.title);
+            title.setText("视频预览");
+            findViewById(R.id.done).setVisibility(View.GONE);
+            findViewById(R.id.trim_tip).setVisibility(View.GONE);
+            findViewById(R.id.video_frame_layout).setVisibility(View.GONE);
+            findViewById(R.id.duration_layout).setVisibility(View.GONE);
+        }
     }
 
     private void changeTime() {
@@ -204,41 +223,26 @@ public class VideoTrimActivity extends AppCompatActivity {
     @SuppressLint("ClickableViewAccessibility")
     private void initPreview(String videoPath) {
 
-        mSelectedEndMs = mDurationMs = mShortVideoTrimmer.getSrcDurationMs();
-        duration.setText("时长: " + formatTime(mDurationMs));
-        mVideoFrameCount = mShortVideoTrimmer.getVideoFrameCount(false);
-        mPreview.setVideoPath(videoPath);
-        mPreview.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                play();
+        try {
+            mSelectedEndMs = mDurationMs = mShortVideoTrimmer.getSrcDurationMs();
+            duration.setText("时长: " + formatTime(mDurationMs));
+            mVideoFrameCount = mShortVideoTrimmer.getVideoFrameCount(false);
+            if (!trim && !videoPath.startsWith("rtsp:")) {
+                mPreview.setVideoPath(videoPath);
+            } else {
+                mPreview.setVideoURI(Uri.parse(videoPath));
+                mPreview.requestFocus();
+                mPreview.start();
             }
-        });
-        mPreview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                controllIv.setVisibility(View.VISIBLE);
-                controllIv.animate().scaleX(3f).scaleY(3f).alpha(0.3f).setDuration(1000).withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        controllIv.setVisibility(View.GONE);
-                    }
-                }).start();
-            }
-        });
-        mPreview.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (mPreview.isPlaying()) {
-                    currentPosition = mPreview.getCurrentPosition();
-                    controllIv.setImageResource(R.drawable.ic_play);
-                    controllIv.setVisibility(View.VISIBLE);
-                    controllIv.animate().scaleX(2f).scaleY(2f).start();
-                    mPreview.pause();
-                } else {
-                    mPreview.seekTo(currentPosition);
-                    mPreview.start();
-                    controllIv.setImageResource(R.drawable.ic_pause);
+            mPreview.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mediaPlayer) {
+                    play();
+                }
+            });
+            mPreview.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
                     controllIv.setVisibility(View.VISIBLE);
                     controllIv.animate().scaleX(3f).scaleY(3f).alpha(0.3f).setDuration(1000).withEndAction(new Runnable() {
                         @Override
@@ -246,10 +250,36 @@ public class VideoTrimActivity extends AppCompatActivity {
                             controllIv.setVisibility(View.GONE);
                         }
                     }).start();
+
                 }
-                return false;
-            }
-        });
+            });
+            mPreview.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (mPreview.isPlaying()) {
+                        currentPosition = mPreview.getCurrentPosition();
+                        controllIv.setImageResource(R.drawable.ic_play);
+                        controllIv.setVisibility(View.VISIBLE);
+                        controllIv.animate().scaleX(2f).scaleY(2f).start();
+                        mPreview.pause();
+                    } else {
+                        mPreview.seekTo(currentPosition);
+                        mPreview.start();
+                        controllIv.setImageResource(R.drawable.ic_pause);
+                        controllIv.setVisibility(View.VISIBLE);
+                        controllIv.animate().scaleX(3f).scaleY(3f).alpha(0.3f).setDuration(1000).withEndAction(new Runnable() {
+                            @Override
+                            public void run() {
+                                controllIv.setVisibility(View.GONE);
+                            }
+                        }).start();
+                    }
+                    return false;
+                }
+            });
+        } catch (Exception e) {
+        } catch (Throwable e) {
+        }
         initVideoFrameList();
     }
 
@@ -305,8 +335,11 @@ public class VideoTrimActivity extends AppCompatActivity {
                     @Override
                     protected Void doInBackground(Void... v) {
                         for (int i = 0; i < SLICE_COUNT; ++i) {
-                            PLVideoFrame frame = mShortVideoTrimmer.getVideoFrameByTime((long) ((1.0f * i / SLICE_COUNT) * mDurationMs), false, sliceEdge, sliceEdge);
-                            publishProgress(frame);
+                            try {
+                                PLVideoFrame frame = mShortVideoTrimmer.getVideoFrameByTime((long) ((1.0f * i / SLICE_COUNT) * mDurationMs), false, sliceEdge, sliceEdge);
+                                publishProgress(frame);
+                            } catch (Exception e) {
+                            }
                         }
                         return null;
                     }
@@ -435,9 +468,9 @@ public class VideoTrimActivity extends AppCompatActivity {
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                ToastUtils.s(VideoTrimActivity.this, "视频已保存到/sdcard/C-Video/Trim文件夹下");
+                //ToastUtils.s(VideoTrimActivity.this, "视频已保存到/sdcard/C-Video/Trim文件夹下");
                 mProcessingDialog.dismiss();
-                QiaomuPlaybackActivity.start(VideoTrimActivity.this, trimed_path);
+                // QiaomuPlaybackActivity.start(VideoTrimActivity.this, trimed_path);
             }
         }, 1000);
         File original = new File(file_path);
@@ -448,6 +481,8 @@ public class VideoTrimActivity extends AppCompatActivity {
         final String renamePath = Config.FILE_PATH_TRIMMED + "/" + rename;
         AppUtils.renameFile(VideoTrimActivity.this, Config.FILE_PATH_TRIMMED, rename, path, !TextUtils.equals(file_path, path));
         trimed_path = renamePath;
+
+        ShareDialog.newInstance(file_path).show(getSupportFragmentManager());
     }
 
     public void onBack(View v) {
@@ -477,5 +512,21 @@ public class VideoTrimActivity extends AppCompatActivity {
     @Override
     public String getPackageName() {
         return !isTrimOk ? "com.qiniu.pili.droid.shortvideo.demo" : super.getPackageName();
+    }
+
+
+    public int getScreenWidth() {
+        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(displayMetrics);
+
+        return displayMetrics.widthPixels;
+    }
+
+    public int getScreenHeight() {
+        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(displayMetrics);
+        return displayMetrics.heightPixels;
     }
 }

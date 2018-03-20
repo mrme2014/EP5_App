@@ -43,10 +43,17 @@ public class CameraController {
                 try {
                     final String changeModeResult = NVTKitModel.changeMode(mode);
                     if (changeModeResult != null) {
+                       // Thread.sleep(1000);
                         if (mode == NVTKitModel.MODE_PHOTO) {
-                            NVTKitModel.videoPlayForPhotoCapture(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
+                            try {
+                                NVTKitModel.videoPlayForPhotoCapture(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
+                            } catch (Exception e) {
+                            }catch (Throwable e){}
                         } else if (mode == NVTKitModel.MODE_MOVIE) {
-                            NVTKitModel.videoPlayForLiveView(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
+                            try {
+                                NVTKitModel.videoPlayForLiveView(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
+                            } catch (Exception e) {
+                            }catch (Throwable e){}
                         }
                     } else {
                         CommonUtil.showToast(mContext, "changeMode fail!!!");
@@ -67,7 +74,7 @@ public class CameraController {
                     }
                 } catch (Exception e) {
 
-                }
+                }catch (Throwable e){}
             }
         }).start();
     }
@@ -89,23 +96,26 @@ public class CameraController {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final Map result = NVTKitModel.takePhoto();
-                CommonUtil.runOnUIThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mOnCameraChangedListener == null) {
-                            return;
+                try {
+                    final Map finalResult = NVTKitModel.takePhoto();
+                    CommonUtil.runOnUIThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mOnCameraChangedListener == null) {
+                                return;
+                            }
+                            if (finalResult == null) {
+                                mOnCameraChangedListener.onTakePhoto(false, null, null, -1);
+                            } else {
+                                mOnCameraChangedListener.onTakePhoto(true,
+                                        finalResult.get(RemoteCameraConstants.RESULT_TAKEPHOTO_PHOTONAME).toString(),
+                                        finalResult.get(RemoteCameraConstants.RESULT_TAKEPHOTO_PHOTOPATH).toString(),
+                                        Integer.valueOf(finalResult.get(RemoteCameraConstants.RESULT_TAKEPHOTO_FREE_NUM).toString()));
+                            }
                         }
-                        if (result == null) {
-                            mOnCameraChangedListener.onTakePhoto(false, null, null, -1);
-                        } else {
-                            mOnCameraChangedListener.onTakePhoto(true,
-                                    result.get(RemoteCameraConstants.RESULT_TAKEPHOTO_PHOTONAME).toString(),
-                                    result.get(RemoteCameraConstants.RESULT_TAKEPHOTO_PHOTOPATH).toString(),
-                                    Integer.valueOf(result.get(RemoteCameraConstants.RESULT_TAKEPHOTO_FREE_NUM).toString()));
-                        }
-                    }
-                });
+                    });
+                } catch (Exception e) {
+                }catch (Throwable e){}
             }
         }).start();
     }
@@ -115,7 +125,10 @@ public class CameraController {
             @Override
             public void run() {
                 if (mCurrentMode != NVTKitModel.MODE_MOVIE) {
-                    changeMode(NVTKitModel.MODE_MOVIE, true);
+                    try {
+                        changeMode(NVTKitModel.MODE_MOVIE, true);
+                    } catch (Exception e) {
+                    }catch (Throwable e){}
                     return;
                 }
                 startVideoNoModeCheck();
@@ -127,18 +140,24 @@ public class CameraController {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String result = NVTKitModel.recordStart();
-                CommonUtil.runOnUIThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mOnCameraChangedListener == null) {
-                            return;
+                try {
+                    final String result = NVTKitModel.recordStart();
+                    CommonUtil.runOnUIThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mOnCameraChangedListener == null) {
+                                return;
+                            }
+                            mOnCameraChangedListener.onStartVideo(RemoteCameraConstants.RESULT_SUCCESS.equals(result));
                         }
-                        mOnCameraChangedListener.onStartVideo(RemoteCameraConstants.RESULT_SUCCESS.equals(result));
-                    }
-                });
-                NVTKitModel.videoPlayForLiveView(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
-                final String ack3 = NVTKitModel.autoTestDone();
+                    });
+                } catch (Exception e) {
+                }catch (Throwable e){}
+                try {
+                    NVTKitModel.videoPlayForLiveView(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
+                    final String ack3 = NVTKitModel.autoTestDone();
+                } catch (Exception e) {
+                }catch (Throwable e){}
             }
         }).start();
     }
@@ -148,15 +167,18 @@ public class CameraController {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String result = NVTKitModel.recordStop();
-                CommonUtil.runOnUIThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mOnCameraChangedListener.onStopVideo(RemoteCameraConstants.RESULT_SUCCESS.equals(result));
-                    }
-                });
-                NVTKitModel.videoPlayForLiveView(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
-                final String ack3 = NVTKitModel.autoTestDone();
+                try {
+                    final String result = NVTKitModel.recordStop();
+                    CommonUtil.runOnUIThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mOnCameraChangedListener.onStopVideo(RemoteCameraConstants.RESULT_SUCCESS.equals(result));
+                        }
+                    });
+                    NVTKitModel.videoPlayForLiveView(mContext, mVideoInterface, mHandler, mSurfaceHolder, mSurfaceView);
+                    final String ack3 = NVTKitModel.autoTestDone();
+                } catch (Exception e) {
+                }catch (Throwable e){}
             }
         }).start();
     }

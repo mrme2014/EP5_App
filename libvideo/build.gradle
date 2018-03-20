@@ -30,10 +30,9 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile files('libs/pldroid-player-2.0.1.jar')
-    compile files('libs/pldroid-shortvideo-1.7.0.jar')
     compile 'cn.aigestudio.downloader:Downloader:1.4.3'
     compile 'com.qiniu:qiniu-android-sdk:7.3.10'
     compile 'org.jetbrains:annotations-java5:15.0'
+    compile files('libs/pldroid-shortvideo-1.7.0.jar')
     compile project(':sharelib')
-
 }

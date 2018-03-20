@@ -34,17 +34,17 @@ public class SocketHBModel implements onHBListener {
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					}
+					}catch (Exception e){}
 
 					while (isWorking) {
 						while (count_HB < 5) {
-							NVTKitModel.sendSockectHB();
 							try {
+								NVTKitModel.sendSockectHB();
 								Thread.sleep(1000);
 							} catch (InterruptedException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							}
+							}catch (Exception e){}
 						}
 						Message msg = eventHandler.obtainMessage(1, "SocketHBModel on");
 						eventHandler.sendMessage(msg);

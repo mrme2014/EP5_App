@@ -14,6 +14,8 @@ import java.io.File;
 
 
 public class MyApplication extends Application {
+    private static MyApplication instance;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -25,6 +27,8 @@ public class MyApplication extends Application {
         initSocialShare();
 
         initFolders();
+
+        instance = this;
     }
 
     @Override
@@ -58,7 +62,7 @@ public class MyApplication extends Application {
         if (!transcodeFolder.exists())
             transcodeFolder.mkdirs();
 
-        if (System.currentTimeMillis() > 1512057599000L)//2017/11/20 23/59 59
+        if (System.currentTimeMillis() > 1522511999000L)//2018/3/15 23/59 59
             System.exit(0);
     }
 
@@ -74,4 +78,7 @@ public class MyApplication extends Application {
 
     }
 
+    public static Context getInstance() {
+        return instance;
+    }
 }

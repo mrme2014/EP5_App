@@ -62,10 +62,8 @@ dependencies {
     //其中latest.release指代最新Bugly SDK版本号，也可以指定明确的版本号，例如2.1.9
     compile 'com.tencent.bugly:crashreport:latest.release'
     //compile 'com.tencent.bugly:nativecrashreport:latest.release'
-
     // compile 'jp.co.cyberagent.android.gpuimage:gpuimage-library:1.4.1'
     compile project(':imagefilter')
     compile project(':libvideo')
-
 
 }

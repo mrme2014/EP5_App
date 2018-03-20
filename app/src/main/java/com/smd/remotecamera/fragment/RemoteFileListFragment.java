@@ -9,10 +9,10 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import jczj.android.com.sharelib.RoundProgressDialog;
 import com.smd.remotecamera.R;
 import com.smd.remotecamera.adapter.FileListAdapter;
 import com.smd.remotecamera.adapter.RemoteFileListPagerAdapter;
@@ -55,9 +55,8 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
         View view = inflater.inflate(R.layout.fragment_remotefile_list, container, false);
         initView(view);
         init();
-        mProgressDialog = new ProgressDialog(getContext());
-        mProgressDialog.setMessage("正在努力加载中...");
-        mProgressDialog.show();
+      //  mProgressDialog = new RoundProgressDialog(getContext());
+      //  mProgressDialog.show();
         return view;
     }
 
@@ -152,6 +151,20 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
     public void setonPagerSelectListener(ViewPager.OnPageChangeListener onPageChangeListener) {
 
         mOnPageChangeListener1 = onPageChangeListener;
+    }
+
+    public boolean ondeleted(RemoteFileBean remoteFileBean) {
+        if (mVp.getCurrentItem() == 0)
+            return mVideoListFragment.onDeleted(remoteFileBean);
+        return mPhotoListFragment.onDeleted(remoteFileBean);
+    }
+
+    public void showDialog() {
+       // mProgressDialog.show();
+    }
+
+    public void dismissDialog() {
+       // mProgressDialog.dismiss();
     }
 
     public interface OnClickBackListener {

@@ -1,5 +1,6 @@
 package com.smd.remotecamera.activity;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,12 +9,15 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.qiaomu.libvideo.VideoTranscodeActivity;
 import com.qiaomu.libvideo.VideoTrimActivity;
+import com.qiaomu.libvideo.utils.AppUtils;
 import com.qiaomu.libvideo.utils.CompressUtils;
 import com.qiaomu.libvideo.utils.ToastUtils;
 import com.smd.remotecamera.R;
@@ -50,10 +54,13 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
     private List<RemoteFileBean> mPhotoList;
     private List<RemoteFileBean> mCheckedList;
     private boolean isVideoEmpty, isPhotoEmpty;
+    private boolean isTranscodeOk;
+    private int mCurPager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_editlist);
 
         initView();
@@ -100,6 +107,40 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
         mIbShui.setOnClickListener(this);
         mTvText.setOnClickListener(this);
         mTvFilter.setOnClickListener(this);
+        findViewById(R.id.activity_downloadfilelist_ib_delete1).setOnClickListener(makeListener());
+        findViewById(R.id.activity_downloadfilelist_ib_delete).setOnClickListener(makeListener());
+    }
+
+    private View.OnClickListener makeListener() {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCheckedList == null || mCheckedList.size() == 0)
+                    return;
+                AppUtils.showAlertDialog(EditListActivity.this, "确定要删除该文件吗?", R.string.ok, R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (which == -1) {
+                            RemoteFileBean remoteFileBean = mCheckedList.remove(0);
+                            File file = new File(mCurPager == 0 ? FileConstants.LOCAL_VIDEO_PATH : FileConstants.LOCAL_PHOTO_PATH, remoteFileBean.getName());
+                            file.delete();
+                            Toast.makeText(getApplicationContext(), "删除成功", Toast.LENGTH_SHORT).show();
+                            boolean isEmpty = mRemoteFileListFragment.ondeleted(remoteFileBean);
+                            if (isEmpty && mCurPager == 0) {
+                                mLLVideo.setVisibility(View.GONE);
+                                isVideoEmpty = true;
+                            }
+                            if (isEmpty && mCurPager == 1) {
+                                isPhotoEmpty = true;
+                                mLLPhoto.setVisibility(View.GONE);
+                            }
+
+
+                        }
+                    }
+                });
+            }
+        };
     }
 
     private void init() {
@@ -198,6 +239,7 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
 
         @Override
         public void onPageSelected(int position) {
+            mCurPager = position;
             switch (position) {
                 case 0:
                     if (!isVideoEmpty) {
@@ -230,13 +272,23 @@ public class EditListActivity extends AppCompatActivity implements FileListAdapt
         switch (v.getId()) {
             case R.id.activity_editfilelist_tv_cut: {
                 String file_path = FileConstants.LOCAL_VIDEO_PATH + File.separator + mCheckedList.get(0).getName();
+                File file = new File(file_path);
+                if (!file.exists()) {
+                    ToastUtils.s(this, "文件不存在");
+                    return;
+                }
                 VideoTrimActivity.startTrimActivity(this, file_path);
             }
             break;
             case R.id.activity_editfilelist_tv_mp4:
             case R.id.activity_editfilelist_tv_compress:
                 String file_path = FileConstants.LOCAL_VIDEO_PATH + File.separator + mCheckedList.get(0).getName();
-                CompressUtils.compress(this, file_path);
+                CompressUtils.compress(this, file_path, new CompressUtils.CompressListener() {
+                    @Override
+                    public void onResult(boolean success) {
+                        isTranscodeOk = true;
+                    }
+                });
 
                 break;
             case R.id.activity_editfilelist_ib_shui:

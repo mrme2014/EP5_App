@@ -15,12 +15,16 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ntk.nvtkit.NVTKitModel;
+import com.ntk.util.Util;
 import com.qiaomu.libvideo.utils.AppUtils;
 import com.qiaomu.libvideo.utils.ToastUtils;
 import com.smd.remotecamera.R;
@@ -32,8 +36,11 @@ import com.smd.remotecamera.core.DownloadCore;
 import com.smd.remotecamera.fragment.RemoteFileListFragment;
 import com.smd.remotecamera.service.DownloadService;
 import com.smd.remotecamera.util.CommonUtil;
+import com.smd.remotecamera.util.SpUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -57,10 +64,12 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
     private List<RemoteFileBean> mCheckedList;
 
     private DownloadCore.OnDownloadProgressChangedListener mOnDownloadProgressChangedListener;
+    private int mCurPager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_downloadlist);
 
         initView();
@@ -70,10 +79,10 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
             @Override
             public void run() {
                 try {
-                    final String ack = NVTKitModel.changeMode(NVTKitModel.MODE_PLAYBACK);
+                    Thread.sleep(1000);
+                    NVTKitModel.changeMode(NVTKitModel.MODE_PLAYBACK);
                 } catch (Exception e) {
-
-                    e.printStackTrace();
+                } catch (Throwable e) {
                 }
                 mRemoteFileController.qeryRemoteFileList();
             }
@@ -125,6 +134,27 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
         mTvEdit = (TextView) findViewById(R.id.activity_downloadfilelist_tv_edit);
         mTvDownload.setOnClickListener(this);
         mTvEdit.setOnClickListener(this);
+        findViewById(R.id.activity_downloadfilelist_ib_delete).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ((mCheckedList == null || mCheckedList.size() == 0))
+                    return;
+                AppUtils.showAlertDialog(DownloadListActivity.this, "确定要删除该文件吗?", R.string.ok, R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                if (which == -1)
+                                    doDelete(mCheckedList.remove(0));
+                            }
+                        }
+                );
+            }
+        });
+    }
+
+    private void doDelete(final RemoteFileBean remoteFileBean) {
+        SpUtils.put(remoteFileBean.getName(), remoteFileBean.getName());
+        mRemoteFileListFragment.ondeleted(remoteFileBean);
+        Toast.makeText(this, "删除成功", Toast.LENGTH_SHORT).show();
     }
 
     private void init() {
@@ -143,6 +173,7 @@ public class DownloadListActivity extends AppCompatActivity implements FileListA
 
             @Override
             public void onPageSelected(int position) {
+                mCurPager = position;
                 boolean isVideoEmpty = mVideoList == null || mVideoList.size() == 0;
                 boolean isPhotoEmpty = mPhotoList == null || mPhotoList.size() == 0;
                 findViewById(R.id.activity_downloadfilelist_ll).setVisibility(position == 0 ? (isVideoEmpty ? View.GONE : View.VISIBLE) : (isPhotoEmpty ? View.GONE : View.VISIBLE));

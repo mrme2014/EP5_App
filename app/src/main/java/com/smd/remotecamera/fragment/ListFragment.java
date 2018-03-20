@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +62,9 @@ public class ListFragment extends Fragment {
         mAdapter.setOnCheckedNumChangedListener(mOnCheckedNumChangedListener);
         mAdapter.setSingle(mIsSingle);
         //mOnCheckedNumChangedListener = null;
+        RecyclerView.RecycledViewPool pool = mRv.getRecycledViewPool();
+        pool.setMaxRecycledViews(0, 20);
+        mRv.setRecycledViewPool(pool);
         mRv.setAdapter(mAdapter);
 
         if (mAdapter == null || mAdapter.getItemCount() <= 0) {
@@ -93,11 +97,32 @@ public class ListFragment extends Fragment {
     }
 
     public void notifyShow() {
-        mAdapter.onShow();
+        if (mAdapter != null) mAdapter.onShow();
     }
 
     public void setOnCheckedNumChangedListener(FileListAdapter.OnCheckedNumChangedListener onCheckedNumChangedListener) {
         mOnCheckedNumChangedListener = onCheckedNumChangedListener;
     }
 
+    public boolean onDeleted(RemoteFileBean remoteFileBean) {
+        int index = -1;
+        for (int i = 0; i < mData.size(); i++) {
+            if (TextUtils.equals(mData.get(i).getName(), remoteFileBean.getName())) {
+                index = i;
+                break;
+            }
+        }
+        if (index >= 0) {
+            mAdapter.onDelete(index);
+        }
+
+
+        if (mAdapter.getItemCount() == 0) {
+            view.findViewById(R.id.empty_layout).setVisibility(View.VISIBLE);
+            ((TextView) view.findViewById(R.id.emptyTipTv)).setText("空空如也~");
+        }
+
+
+        return mAdapter.getItemCount() == 0;
+    }
 }
