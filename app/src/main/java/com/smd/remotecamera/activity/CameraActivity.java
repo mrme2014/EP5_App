@@ -401,7 +401,6 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
     @Override
     public void onClick(View v) {
 
-
         switch (v.getId()) {
             case R.id.recoder:
                 if (!mIsConnected) {
@@ -415,6 +414,7 @@ public class CameraActivity extends AppCompatActivity implements VideoInterface,
                     mCameraController.startVideo();
                     showTopPb();
                 }
+
                 break;
             case R.id.camera_ib_camera:
                 if (!mIsConnected) {

@@ -21,6 +21,8 @@ import com.smd.remotecamera.util.CommonUtil;
 
 import java.util.List;
 
+import jczj.android.com.sharelib.RoundProgressDialog;
+
 
 public class ListFragment extends Fragment {
 
@@ -33,6 +35,8 @@ public class ListFragment extends Fragment {
     private FileListAdapter.OnCheckedNumChangedListener mOnCheckedNumChangedListener;
     private View view;
     private String mNameType;
+
+
 
     public ListFragment() {
     }
@@ -53,6 +57,8 @@ public class ListFragment extends Fragment {
     }
 
     private void initView(View view) {
+
+
 
         mRv = (RecyclerView) view.findViewById(R.id.fragment_list_rv);
         mRv.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.VERTICAL, false));
@@ -94,6 +100,7 @@ public class ListFragment extends Fragment {
                 }
             });
         }
+
     }
 
     public void notifyShow() {

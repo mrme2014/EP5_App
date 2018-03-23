@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import jczj.android.com.sharelib.RoundProgressDialog;
+
 import com.smd.remotecamera.R;
 import com.smd.remotecamera.adapter.FileListAdapter;
 import com.smd.remotecamera.adapter.RemoteFileListPagerAdapter;
@@ -38,7 +39,7 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
     private boolean mIsSingle;
     private String mNameType;
     private ViewPager.OnPageChangeListener mOnPageChangeListener1;
-    ProgressDialog mProgressDialog;
+    private RoundProgressDialog mProgressDialog;
 
     public RemoteFileListFragment() {
     }
@@ -53,10 +54,14 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_remotefile_list, container, false);
+
+        mProgressDialog = new RoundProgressDialog(getContext());
+        mProgressDialog.show();
+
+
         initView(view);
         init();
-      //  mProgressDialog = new RoundProgressDialog(getContext());
-      //  mProgressDialog.show();
+
         return view;
     }
 
@@ -97,7 +102,8 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
     }
 
     public void setData(List<RemoteFileBean> videoData, List<RemoteFileBean> photoData) {
-        mProgressDialog.dismiss();
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+
         mVideoListFragment.setData(videoData);
         mPhotoListFragment.setData(photoData);
     }
@@ -157,14 +163,6 @@ public class RemoteFileListFragment extends Fragment implements View.OnClickList
         if (mVp.getCurrentItem() == 0)
             return mVideoListFragment.onDeleted(remoteFileBean);
         return mPhotoListFragment.onDeleted(remoteFileBean);
-    }
-
-    public void showDialog() {
-       // mProgressDialog.show();
-    }
-
-    public void dismissDialog() {
-       // mProgressDialog.dismiss();
     }
 
     public interface OnClickBackListener {
